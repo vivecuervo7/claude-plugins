@@ -1,0 +1,19 @@
+{
+  "name": "vivecuervo7-plugins",
+  "owner": {
+    "name": "Isaac Dedini"
+  },
+  "metadata": {
+    "description": "Claude Code plugins for developer productivity"
+  },
+  "plugins": [
+    {
+      "name": "claude-journal",
+      "source": "./plugins/claude-journal",
+      "description": "A developer journaling system — log work, recap progress, search history, attach media",
+      "version": "0.1.0",
+      "license": "MIT",
+      "keywords": ["journaling", "productivity", "devlog"]
+    }
+  ]
+}
