@@ -7,7 +7,7 @@ Claude Code plugins for developer productivity.
 Add the marketplace:
 
 ```bash
-claude plugin marketplace add vive-claude/claude-plugins
+claude plugin marketplace add vivecuervo7/claude-plugins
 ```
 
 Then install individual plugins:

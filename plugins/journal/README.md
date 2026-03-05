@@ -5,7 +5,7 @@ A developer journaling system for Claude Code. Log work as you go, recap progres
 ## Install
 
 ```bash
-claude plugin marketplace add vive-claude/claude-plugins
+claude plugin marketplace add vivecuervo7/claude-plugins
 claude plugin install journal@vive-claude
 ```
 
