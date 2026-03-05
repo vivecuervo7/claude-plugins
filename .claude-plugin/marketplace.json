@@ -1,5 +1,5 @@
 {
-  "name": "vivecuervo7-plugins",
+  "name": "vive-claude",
   "owner": {
     "name": "Isaac Dedini"
   },
@@ -8,8 +8,8 @@
   },
   "plugins": [
     {
-      "name": "claude-journal",
-      "source": "./plugins/claude-journal",
+      "name": "journal",
+      "source": "./plugins/journal",
       "description": "A developer journaling system — log work, recap progress, search history, attach media",
       "version": "0.1.0",
       "license": "MIT",

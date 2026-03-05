@@ -1,12 +1,12 @@
-# claude-journal
+# journal
 
 A developer journaling system for Claude Code. Log work as you go, recap progress, search your history, attach media.
 
 ## Install
 
 ```bash
-claude plugin marketplace add vivecuervo7/claude-plugins
-claude plugin install claude-journal@vivecuervo7-plugins
+claude plugin marketplace add vive-claude/claude-plugins
+claude plugin install journal@vive-claude
 ```
 
 ## First Run
