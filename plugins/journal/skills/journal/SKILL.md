@@ -3,7 +3,7 @@ name: journal
 description: "Logs work, recaps progress, searches history, and attaches media to a developer journal. Triggers: \"journal this\", \"journal recent work\", \"recap\", \"journal search\", \"journal attach\", \"journal setup\", or needs to record completed tasks, decisions, or progress."
 user-invocable: true
 argument-hint: "recap, search, attach, setup"
-allowed-tools: Read, Write, Edit, Glob, Bash(bash **/vive-claude/journal/*/skills/journal/scripts/*), Bash(node **/vive-claude/journal/*/skills/journal/scripts/*)
+allowed-tools: Read, Write, Edit, Glob, Bash(bash **/vive-claude/journal/*/skills/journal/scripts/*), Bash(node **/vive-claude/journal/*/skills/journal/scripts/*), Bash(bash **/vive-claude/journal/*/skills/journal/scripts/*:*), Bash(node **/vive-claude/journal/*/skills/journal/scripts/*:*)
 ---
 
 # Journal
