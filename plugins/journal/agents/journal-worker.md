@@ -3,6 +3,7 @@ name: journal-worker
 model: haiku
 color: green
 tools: Read, Write, Glob, Bash
+permissionMode: dontAsk
 skills:
   - journal:journal
 ---
