@@ -97,6 +97,13 @@ Journaled: <summary> → entries/YYYY/MM/DD/HH-MM-project.md
 
 Run `/journal setup` to enable auto-journaling. Setup will offer to add the required CLAUDE.md snippet automatically.
 
+The snippet spawns the dedicated `journal:journal-worker` agent in the background. This agent has the journal skill preloaded and pre-declared tools, so it runs without permission prompts:
+
+```
+Agent(subagent_type="journal:journal-worker", run_in_background=true,
+  prompt="<what was done>")
+```
+
 ---
 
 ## Edge Cases
@@ -122,6 +129,7 @@ Run `/journal setup` to enable auto-journaling. Setup will offer to add the requ
 | `scripts/journal-context.sh` | Date, project, git detection | Run in Before Any Mode step 1 |
 | `scripts/journal-index.js` | Index upsert, media increment, filtered list | Run by append, attach, recap, search |
 | `scripts/journal-attach.sh` | Media file validation and copy | Run by attach mode |
+| `agents/journal-worker.md` | Background auto-journal agent | Spawned by main agent for auto-journaling |
 
 ## Keywords
 

@@ -36,9 +36,8 @@ After completing a task — creating files, fixing a bug, implementing a feature
 scaffolding code, making an architectural decision — journal it. Err on the side
 of journalling too much rather than too little. If in doubt, journal it.
 Don't interrupt flow — spawn in the background and continue working:
-Agent(subagent_type="general-purpose", model="<auto_journal_model from config, default haiku>", run_in_background=true,
-  prompt="Use the Skill tool to invoke the 'journal' skill, then follow its
-  instructions to record: <what was done>")
+Agent(subagent_type="journal:journal-worker", run_in_background=true,
+  prompt="<what was done>")
 ```
 
 5. Confirm:
