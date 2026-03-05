@@ -12,8 +12,12 @@
 
 1. Calculate the date range: from (today - N days) to today.
 2. Glob for monthly index files in range: `$JOURNAL_ROOT/entries/*/*/index.json`
-3. Read each relevant index and filter entries by date range and optional project.
-4. Read the actual entry files for full content.
+3. Query entries using the bundled script. Pass all matching index paths (comma-separated) and filters:
+   ```bash
+   node ${CLAUDE_SKILL_DIR}/scripts/journal-index.js list "path1/index.json,path2/index.json" --from YYYY-MM-DD --to YYYY-MM-DD [--project name]
+   ```
+   The script returns a JSON array of matching entries sorted by date. Each entry includes a `_path` field with the full filesystem path to the entry file.
+4. For a quick overview, use the `summary` field from the list output. Only read full entry files (via `_path`) for entries that are flagged (blog-worthy, demo-worthy, reusable) or need deeper context.
 5. Compose a **narrative recap** — not a raw dump. Structure it as:
 
 ```markdown

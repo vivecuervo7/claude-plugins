@@ -110,6 +110,19 @@ Run `/journal setup` to enable auto-journaling. Setup will offer to add the requ
 - **Attach with no entry today**: Tell the user to run `/journal` first.
 - **Attach matches media hint**: Auto-fill the description from the hint and check it off.
 
+## References
+
+| File | Contents | When to load |
+|------|----------|--------------|
+| `references/append.md` | Entry composition, frontmatter schema, index upsert | MANDATORY for append mode |
+| `references/recap.md` | Date range querying, narrative recap structure | MANDATORY for recap mode |
+| `references/search.md` | Query parsing, index search, results formatting | MANDATORY for search mode |
+| `references/attach.md` | Media copy, frontmatter linking, index media increment | MANDATORY for attach mode |
+| `references/setup.md` | First-run config, pointer file, auto-journal snippet | MANDATORY for setup mode |
+| `scripts/journal-context.sh` | Date, project, git detection | Run in Before Any Mode step 1 |
+| `scripts/journal-index.js` | Index upsert, media increment, filtered list | Run by append, attach, recap, search |
+| `scripts/journal-attach.sh` | Media file validation and copy | Run by attach mode |
+
 ## Keywords
 
 devlog, work log, developer journal, recap, standup, blog-worthy, demo-worthy, progress tracking, media capture
