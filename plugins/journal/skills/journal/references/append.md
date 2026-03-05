@@ -2,14 +2,7 @@
 
 ## Step 1: Detect Project
 
-Run:
-```bash
-git rev-parse --show-toplevel 2>/dev/null
-```
-
-- If in a git repo: project name = basename of the repo root, `git_repo: true`
-- If not: project name = basename of current working directory, `git_repo: false`
-- `path` = the current working directory (from `pwd`)
+Already done in "Before Any Mode" via `journal-context.sh`. Use the `project`, `git_repo`, and `project_path` values from that output.
 
 ## Step 2: Check for Existing Entry Today
 
@@ -73,52 +66,21 @@ Write freeform markdown summarising the work done. Guidelines:
 
 ## Step 4: Write the Entry File
 
-```bash
-mkdir -p "$JOURNAL_ROOT/entries/YYYY/MM/DD"
-```
-
-Write the file:
+Use the Write tool to create/overwrite the file (Write creates parent directories automatically):
 - **New entry**: `$JOURNAL_ROOT/entries/YYYY/MM/DD/HH-MM-<project>.md`
 - **Update**: Same path as the existing file (preserving original timestamp)
 
-Use the Write tool to create/overwrite the file.
-
 ## Step 5: Update Monthly Index
-
-Read the existing index at `$JOURNAL_ROOT/entries/YYYY/MM/index.json` (or start with an empty entries array if it doesn't exist).
 
 Extract the summary from the **first paragraph** of the body (first line(s) up to the first blank line, truncated to ~120 chars if needed).
 
-If updating an existing entry, find and replace its record in the index. If new, append.
-
-Write the full index back:
-
-```json
-{
-  "version": 1,
-  "entries": [
-    {
-      "date": "YYYY-MM-DD",
-      "time": "HH:MM",
-      "project": "<project>",
-      "tags": ["tag1", "tag2"],
-      "summary": "<first paragraph summary>",
-      "has_media_hints": true,
-      "media_count": 0,
-      "file": "DD/HH-MM-project.md"
-    }
-  ]
-}
+Run the bundled index script to upsert the entry:
+```bash
+node ${CLAUDE_SKILL_DIR}/scripts/journal-index.js upsert "$JOURNAL_ROOT/entries/YYYY/MM/index.json" '{"date":"YYYY-MM-DD","time":"HH:MM","project":"<project>","tags":["tag1","tag2"],"summary":"<first paragraph summary>","has_media_hints":false,"media_count":0,"file":"DD/HH-MM-project.md"}'
 ```
+
+The script handles creating the index file if it doesn't exist and replacing any existing entry with the same `file` value.
 
 ## Step 6: Confirm
 
-Output a brief confirmation:
-```
-Journaled: <summary> → entries/YYYY/MM/DD/HH-MM-project.md
-```
-
-If this was an update, note that:
-```
-Updated: <summary> → entries/YYYY/MM/DD/HH-MM-project.md (refined existing entry)
-```
+Use the confirmation format from SKILL.md. For updates, prefix with "Updated:" instead of "Journaled:" and add "(refined existing entry)".

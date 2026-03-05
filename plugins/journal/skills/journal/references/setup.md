@@ -8,29 +8,16 @@ Runs automatically on first use (when `~/.claude/journal-config.json` doesn't ex
    - `~/.claude-journal` (Recommended)
    - Custom path
 
-2. Write the pointer file:
-   ```bash
-   mkdir -p ~/.claude
-   ```
-   Write `~/.claude/journal-config.json`:
+2. Write the pointer file using the Write tool (creates parent directories automatically):
+   `~/.claude/journal-config.json`:
    ```json
    {
      "journal_root": "<chosen-path>"
    }
    ```
 
-3. Create the journal root directory and default config:
-   ```bash
-   mkdir -p "<chosen-path>/entries"
-   ```
-   Write `<chosen-path>/config.json`:
-   ```json
-   {
-     "default_recap_days": 7,
-     "media_hints_enabled": true,
-     "auto_journal_model": "haiku"
-   }
-   ```
+3. Create the journal root config using the Write tool (creates parent directories automatically):
+   `<chosen-path>/config.json` — use the default config from SKILL.md "Before Any Mode" step 3.
 
 4. Ask the user if they want to enable auto-journaling:
    - Yes — add the snippet to CLAUDE.md (Recommended)

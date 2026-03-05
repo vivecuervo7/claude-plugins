@@ -3,6 +3,7 @@ name: journal
 description: "Log work, recap progress, search history, and attach media to a developer journal. Triggers: \"journal this\", \"journal recent work\", \"recap\", \"journal search\", \"journal attach\", \"journal setup\", or needs to record completed tasks, decisions, or progress."
 user-invocable: true
 argument-hint: "recap, search, attach, setup"
+allowed-tools: Read, Write, Edit, Glob, Bash(bash */scripts/*), Bash(node */scripts/*)
 ---
 
 # Journal
@@ -43,11 +44,11 @@ CONFIG_PATH  = $JOURNAL_ROOT/config.json
 
 ## Before Any Mode
 
-1. **Get the current date and time** by running:
+1. **Gather context** by running the bundled script from the skill directory:
    ```bash
-   date +%Y-%m-%d && date +%H:%M
+   bash ${CLAUDE_SKILL_DIR}/scripts/journal-context.sh
    ```
-   NEVER use your internal clock. Always shell out for the real time.
+   This outputs four lines: `date time` (space-separated on one line), `project`, `git_repo` (true/false), `project_path`. NEVER use your internal clock.
 
 2. **Resolve journal root.** Check in order:
    a. Read `~/.claude/journal-config.json` — if it exists, use its `journal_root` value.
@@ -56,11 +57,7 @@ CONFIG_PATH  = $JOURNAL_ROOT/config.json
 
    If the pointer file does not exist, **read and run `references/setup.md`** before proceeding. This only happens on first use.
 
-3. **Ensure journal root exists.**
-   ```bash
-   mkdir -p "$JOURNAL_ROOT/entries"
-   ```
-   Write `$JOURNAL_ROOT/config.json` if it doesn't exist:
+3. **Ensure journal root exists.** Use the Read tool to check if `$JOURNAL_ROOT/config.json` exists. If not, use the Write tool to create it (Write creates parent directories automatically):
    ```json
    {
      "default_recap_days": 7,
