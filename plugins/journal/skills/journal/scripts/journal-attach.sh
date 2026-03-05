@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Copies a media file into journal storage.
 # Usage: journal-attach.sh <source> <dest-dir> <dest-filename>
 # Verifies source exists, creates dest dir, copies file.

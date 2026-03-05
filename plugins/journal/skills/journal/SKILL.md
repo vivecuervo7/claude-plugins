@@ -1,6 +1,6 @@
 ---
 name: journal
-description: "Log work, recap progress, search history, and attach media to a developer journal. Triggers: \"journal this\", \"journal recent work\", \"recap\", \"journal search\", \"journal attach\", \"journal setup\", or needs to record completed tasks, decisions, or progress."
+description: "Logs work, recaps progress, searches history, and attaches media to a developer journal. Triggers: \"journal this\", \"journal recent work\", \"recap\", \"journal search\", \"journal attach\", \"journal setup\", or needs to record completed tasks, decisions, or progress."
 user-invocable: true
 argument-hint: "recap, search, attach, setup"
 allowed-tools: Read, Write, Edit, Glob, Bash(bash */scripts/*), Bash(node */scripts/*)
@@ -109,3 +109,7 @@ Run `/journal setup` to enable auto-journaling. Setup will offer to add the requ
 - **Project name with special chars**: Sanitise to lowercase alphanumeric + hyphens for the filename.
 - **Attach with no entry today**: Tell the user to run `/journal` first.
 - **Attach matches media hint**: Auto-fill the description from the hint and check it off.
+
+## Keywords
+
+devlog, work log, developer journal, recap, standup, blog-worthy, demo-worthy, progress tracking, media capture

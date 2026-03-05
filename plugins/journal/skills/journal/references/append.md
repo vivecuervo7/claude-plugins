@@ -49,7 +49,8 @@ Omit `media_hints` and `media` entirely when they have no entries. Do not write 
 Write freeform markdown summarising the work done. Guidelines:
 
 - **First paragraph** is the summary — it gets extracted for the index. Make it a clear, standalone description of what was done and why.
-- Keep it concise but complete. Short entries (1-2 paragraphs) are fine.
+- Keep it concise but complete. Short entries (1-2 paragraphs) are fine. Target this level of detail:
+  > Implemented token-bucket rate limiting on all public API endpoints. Chose token-bucket over sliding window for burst tolerance. Configurable per-route, defaulting to 100 req/min.
 - For `blog-worthy` entries, add richer sections inline:
   - `### Blog Angle` — the hook or counterintuitive insight
   - `### Key Code` — notable code snippets worth highlighting
