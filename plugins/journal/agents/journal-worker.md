@@ -5,12 +5,6 @@ color: green
 tools: Read, Write, Glob, Bash
 skills:
   - journal:journal
-hooks:
-  PreToolUse:
-    - matcher: "*"
-      hooks:
-        - type: command
-          command: "bash ../scripts/pretooluse-ask.sh"
 ---
 
 # Journal Worker Agent
