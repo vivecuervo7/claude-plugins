@@ -1,6 +1,6 @@
 ---
 name: journal-worker
-model: haiku
+model: sonnet
 color: green
 tools: Read, Write, Glob, Bash
 skills:
