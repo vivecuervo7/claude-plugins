@@ -97,7 +97,7 @@ Media files are stored alongside entries and referenced from the markdown, makin
 {
   "default_recap_days": 7,
   "media_hints_enabled": true,
-  "auto_journal_model": "haiku"
+  "auto_journal_model": "sonnet"
 }
 ```
 
@@ -105,7 +105,7 @@ Media files are stored alongside entries and referenced from the markdown, makin
 |-----|---------|-------------|
 | `default_recap_days` | 7 | Days to cover in `/journal recap` when no count is given |
 | `media_hints_enabled` | true | Add media capture prompts to blog-worthy/demo-worthy entries |
-| `auto_journal_model` | `"haiku"` | Model used for background auto-journaling (`"haiku"`, `"sonnet"`, `"opus"`) |
+| `auto_journal_model` | `"sonnet"` | Model used for background auto-journaling (`"haiku"`, `"sonnet"`, `"opus"`) |
 
 The pointer file at `~/.claude/journal-config.json` stores only the journal root path.
 
@@ -113,7 +113,7 @@ The pointer file at `~/.claude/journal-config.json` stores only the journal root
 
 The plugin doesn't auto-journal by default. Run `/journal setup` to enable it — setup will offer to add the required instructions to your `CLAUDE.md` (global or project-level). This tells Claude to automatically journal completed work in the background.
 
-Auto-journaling runs on a lightweight model (configurable via `auto_journal_model`). The only visible output is a one-line confirmation. If the entry includes media hints (for blog-worthy or demo-worthy work), they're surfaced as passive reminders:
+Auto-journaling runs on a configurable model (see `auto_journal_model` in config). The only visible output is a one-line confirmation. If the entry includes media hints (for blog-worthy or demo-worthy work), they're surfaced as passive reminders:
 
 ```
 Journaled: Added rate limiting to API endpoints → entries/2026/03/05/14-32-my-api.md
@@ -121,6 +121,29 @@ Journaled: Added rate limiting to API endpoints → entries/2026/03/05/14-32-my-
 ```
 
 Use `/journal attach` to provide the media when ready.
+
+### Background agent permissions
+
+Auto-journaling uses a background agent, which requires explicit tool permissions in your `~/.claude/settings.json`. Without these, the background agent will silently fail (this is a [known Claude Code limitation](https://github.com/anthropics/claude-code/issues/18172)).
+
+Add the following to your `permissions.allow` array:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Bash(bash **/vive-claude/journal/*/skills/journal/scripts/*)",
+      "Bash(node **/vive-claude/journal/*/skills/journal/scripts/*)"
+    ]
+  }
+}
+```
+
+**Note:** `Read`, `Write`, `Edit`, and `Glob` are global permissions — they apply to all Claude Code activity, not just the journal plugin. The `Bash` patterns are scoped to the journal's bundled scripts only. Review these permissions and decide what you're comfortable with before adding them. Interactive journaling (`/journal`) does not require these — it runs in the foreground where permissions are prompted normally.
 
 ## Entry format
 

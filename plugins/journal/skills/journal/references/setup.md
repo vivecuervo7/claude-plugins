@@ -40,7 +40,28 @@ Agent(subagent_type="journal:journal-worker", run_in_background=true,
   prompt="<what was done>")
 ```
 
-5. Confirm:
+5. If auto-journaling was enabled, inform the user about required permissions:
+
+   ```
+   ⚠️  Background auto-journaling requires tool permissions in ~/.claude/settings.json.
+   Add these to your permissions.allow array:
+
+     "Read",
+     "Write",
+     "Edit",
+     "Glob",
+     "Bash(bash **/vive-claude/journal/*/skills/journal/scripts/*)",
+     "Bash(node **/vive-claude/journal/*/skills/journal/scripts/*)"
+
+   Note: Read, Write, Edit, and Glob are global — they apply to all Claude Code
+   activity, not just journaling. The Bash patterns are scoped to journal scripts only.
+   Without these, background journaling will silently fail.
+   Interactive journaling (/journal) works without these permissions.
+   ```
+
+   Do NOT modify settings.json automatically. The user should review and add these themselves.
+
+6. Confirm:
    ```
    Journal configured → <chosen-path>
    ```
