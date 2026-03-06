@@ -30,6 +30,18 @@ Use the first match.
 
 ## Confirmation Format
 
+Your final output is the ONLY thing the user sees. Always use this exact format:
+
 ```
 Journaled: <summary> → entries/YYYY/MM/DD/HH-MM-project.md
 ```
+
+If the entry has `media_hints` in its frontmatter, you MUST append each hint on its own line:
+
+```
+Journaled: <summary> → entries/YYYY/MM/DD/HH-MM-project.md
+  📷 Capture while fresh: <description of screenshot/screencast>
+  📷 Capture while fresh: <description of another hint>
+```
+
+This is critical — media hints surface time-sensitive capture opportunities to the user. Never omit them.
