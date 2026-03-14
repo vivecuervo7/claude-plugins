@@ -103,14 +103,14 @@ if (command === "upsert") {
         console.error(`WARNING: Skipping corrupt index file ${p}: ${e.message}`);
         continue;
       }
-      const dir = path.basename(path.dirname(p));
-      const month = path.basename(path.dirname(path.dirname(p)));
+      const month = path.basename(path.dirname(p));
+      const year = path.basename(path.dirname(path.dirname(p)));
       const indexDir = path.dirname(p);
       entries.push(
         ...(data.entries || []).map((e) => ({
           ...e,
           _index: p,
-          _month: `${month}/${dir}`,
+          _month: `${year}/${month}`,
           _path: path.join(indexDir, e.file),
         }))
       );
