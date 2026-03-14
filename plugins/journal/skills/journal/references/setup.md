@@ -35,9 +35,12 @@ Runs automatically on first use (when `~/.claude/journal-config.json` doesn't ex
 After completing a task — creating files, fixing a bug, implementing a feature,
 scaffolding code, making an architectural decision — journal it. Err on the side
 of journalling too much rather than too little. If in doubt, journal it.
-Don't interrupt flow — spawn in the background and continue working:
 Agent(subagent_type="journal:journal-worker", run_in_background=true,
   prompt="<what was done>")
+
+When the journal-worker completes, **always relay its result to the user** in a
+brief message. This surfaces the confirmation and any media hints (e.g.
+"Capture while fresh: ...") so the user can act on them without checking tasks.
 ```
 
 5. If auto-journaling was enabled, inform the user about required permissions:
@@ -50,8 +53,8 @@ Agent(subagent_type="journal:journal-worker", run_in_background=true,
      "Write",
      "Edit",
      "Glob",
-     "Bash(bash **/vive-claude/journal/*/skills/journal/scripts/*)",
-     "Bash(node **/vive-claude/journal/*/skills/journal/scripts/*)"
+     "Bash(bash **/journal/*/skills/journal/scripts/*)",
+     "Bash(node **/journal/*/skills/journal/scripts/*)"
 
    Note: Read, Write, Edit, and Glob are global — they apply to all Claude Code
    activity, not just journaling. The Bash patterns are scoped to journal scripts only.

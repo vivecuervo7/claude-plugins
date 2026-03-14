@@ -50,6 +50,12 @@ CONFIG_PATH  = $JOURNAL_ROOT/config.json
    ```
    This outputs four lines: `date time` (space-separated on one line), `project`, `git_repo` (true/false), `project_path`. NEVER use your internal clock.
 
+   If the script is unavailable or Bash is denied, fall back to:
+   ```bash
+   date +"%Y-%m-%d %H:%M"
+   ```
+   and infer `project` from the working directory name and `git_repo` from whether a `.git` directory exists.
+
 2. **Resolve journal root.** Check in order:
    a. Read `~/.claude/journal-config.json` — if it exists, use its `journal_root` value.
    b. Check env `CLAUDE_JOURNAL_ROOT` — if set, use it.
@@ -61,8 +67,7 @@ CONFIG_PATH  = $JOURNAL_ROOT/config.json
    ```json
    {
      "default_recap_days": 7,
-     "media_hints_enabled": true,
-     "auto_journal_model": "haiku"
+     "media_hints_enabled": true
    }
    ```
 
@@ -76,8 +81,7 @@ CONFIG_PATH  = $JOURNAL_ROOT/config.json
 
 When invoked as a background auto-journal (spawned by the main agent, not by the user running `/journal`):
 
-1. **Use configured model.** The calling agent should spawn with `model: "<config.auto_journal_model>"` (defaults to `"haiku"`).
-2. **No user interaction.** Do not ask questions or use AskUserQuestion. Make reasonable choices autonomously.
+1. **No user interaction.** Do not ask questions or use AskUserQuestion. Make reasonable choices autonomously.
 3. **Minimal output.** One confirmation line when complete.
 4. **First-run**: Use default `~/.claude-journal` silently — do not run interactive setup.
 
@@ -97,7 +101,7 @@ Journaled: <summary> → entries/YYYY/MM/DD/HH-MM-project.md
 
 Run `/journal setup` to enable auto-journaling. Setup will offer to add the required CLAUDE.md snippet automatically.
 
-The snippet spawns the dedicated `journal:journal-worker` agent in the background. This agent has the journal skill preloaded and pre-declared tools, so it runs without permission prompts:
+The snippet spawns the dedicated `journal:journal-worker` agent:
 
 ```
 Agent(subagent_type="journal:journal-worker", run_in_background=true,
