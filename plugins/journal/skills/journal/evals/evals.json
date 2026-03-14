@@ -1,0 +1,43 @@
+{
+  "skill_name": "journal",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/journal Fixed a null pointer crash in the payment handler — the order object wasn't being checked before accessing order.items. Added a guard clause and a unit test covering the empty order case.",
+      "expected_output": "Routes to append mode. Creates a journal entry file with correct frontmatter, accurate body, real timestamp, and updates the monthly index.",
+      "files": [],
+      "expectations": [
+        "Reads append.md (not recap.md, search.md, or setup.md)",
+        "Creates a .md entry file under the journal root entries directory",
+        "Entry frontmatter includes date, time, project, git_repo, and tags fields",
+        "Runs journal-index.js upsert to update the monthly index",
+        "Output confirmation starts with 'Journaled:'"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "log today's work — added pagination to the user list endpoint, returns 20 results per page with a next_cursor field",
+      "expected_output": "Recognises natural-language append intent without a /journal prefix. Routes to append mode and creates a journal entry.",
+      "files": [],
+      "expectations": [
+        "Reads append.md (routes to append despite no /journal prefix)",
+        "Does not read recap.md or search.md",
+        "Creates a .md entry file under the journal root entries directory",
+        "Output confirmation starts with 'Journaled:'"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "/journal Tracked down a 10x slowdown to a missing composite index — the query planner was doing a full table scan on 8M rows because it couldn't use a partial index with a type mismatch. Adding a cast and rebuilding the index dropped query time from 4s to 40ms. Would make a great write-up about Postgres index selection.",
+      "expected_output": "Routes to append mode. Recognises the entry as blog-worthy. Includes media_hints and a 📷 Capture line in the confirmation.",
+      "files": [],
+      "expectations": [
+        "Reads append.md",
+        "Creates a .md entry file under the journal root entries directory",
+        "Entry is tagged blog-worthy",
+        "Entry frontmatter includes at least one media_hint",
+        "Output confirmation includes a 📷 Capture while fresh line"
+      ]
+    }
+  ]
+}

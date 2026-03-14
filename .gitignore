@@ -1,1 +1,4 @@
 .DS_Store
+
+# Eval workspace output (generated during eval runs)
+**/journal-workspace/
