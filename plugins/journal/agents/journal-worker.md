@@ -1,8 +1,9 @@
 ---
 name: journal-worker
-model: sonnet
+description: "Proactive auto-journal agent, spawned by the main agent after completing tasks. Not for user-initiated journal requests — use the journal:journal skill for those."
+model: haiku
 color: green
-tools: Read, Write, Glob, Bash
+tools: ["Read", "Write", "Glob", "Bash(bash **/journal/*/skills/journal/scripts/*)", "Bash(node **/journal/*/skills/journal/scripts/*)"]
 skills:
   - journal:journal
 ---
