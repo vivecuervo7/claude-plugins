@@ -2,16 +2,19 @@
 
 ## Step 1: Detect Project
 
-Already done in "Before Any Mode" via `journal-context.sh`. Use the `project`, `git_repo`, and `project_path` values from that output.
+Already done in "Before Any Mode". Use the `date`, `time`, `project`, `git_repo`, and `project_path` values from those scripts.
 
 ## Step 2: Check for Existing Entry Today
 
-Look for an existing entry for this project today:
-```
-$JOURNAL_ROOT/entries/YYYY/MM/DD/*-<project>.md
+```bash
+bash ${CLAUDE_SKILL_DIR}/scripts/journal-find-entry.sh "$JOURNAL_ROOT" "YYYY-MM-DD" "<project>"
 ```
 
-Use Glob to check. If found, this is an **update** — read the existing file and note its filename (preserve the original timestamp in the filename).
+If a path is returned, this is an **update** — read the existing content and note the filename (preserve the original timestamp):
+
+```bash
+bash ${CLAUDE_SKILL_DIR}/scripts/journal-read-entry.sh "<existing-path>"
+```
 
 ## Step 3: Compose the Entry
 
@@ -67,9 +70,16 @@ Write freeform markdown summarising the work done. Guidelines:
 
 ## Step 4: Write the Entry File
 
-Use the Write tool to create/overwrite the file (Write creates parent directories automatically):
-- **New entry**: `$JOURNAL_ROOT/entries/YYYY/MM/DD/HH-MM-<project>.md`
-- **Update**: Same path as the existing file (preserving original timestamp)
+Pass the composed entry to the write script via heredoc:
+
+```bash
+bash ${CLAUDE_SKILL_DIR}/scripts/journal-write-entry.sh "<path>" << 'EOF'
+<full entry content>
+EOF
+```
+
+- **New entry path**: `$JOURNAL_ROOT/entries/YYYY/MM/DD/HH-MM-<project>.md`
+- **Update path**: Same as the existing file (preserving original timestamp)
 
 ## Step 5: Update Monthly Index
 

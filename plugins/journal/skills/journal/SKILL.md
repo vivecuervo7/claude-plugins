@@ -44,36 +44,27 @@ CONFIG_PATH  = $JOURNAL_ROOT/config.json
 
 ## Before Any Mode
 
-1. **Gather context** by running the bundled script from the skill directory:
+1. **Gather context** by running the bundled scripts:
    ```bash
-   bash ${CLAUDE_SKILL_DIR}/scripts/journal-context.sh
+   bash ${CLAUDE_SKILL_DIR}/scripts/journal-date.sh      # → "YYYY-MM-DD HH:MM"
+   bash ${CLAUDE_SKILL_DIR}/scripts/journal-project.sh   # → project name
+   bash ${CLAUDE_SKILL_DIR}/scripts/journal-git.sh       # → "true/false" then project path
    ```
-   This outputs four lines: `date time` (space-separated on one line), `project`, `git_repo` (true/false), `project_path`. NEVER use your internal clock.
+   NEVER use your internal clock for the date.
 
-   If the script is unavailable or Bash is denied, fall back to:
+2. **Resolve journal root:**
    ```bash
-   date +"%Y-%m-%d %H:%M"
+   bash ${CLAUDE_SKILL_DIR}/scripts/journal-root.sh
    ```
-   and infer `project` from the working directory name and `git_repo` from whether a `.git` directory exists.
+   If the pointer file does not exist (first interactive run), **read and run `references/setup.md`** before proceeding.
 
-2. **Resolve journal root.** Check in order:
-   a. Read `~/.claude/journal-config.json` — if it exists, use its `journal_root` value.
-   b. Check env `CLAUDE_JOURNAL_ROOT` — if set, use it.
-   c. Fall through to default `~/.claude-journal`.
-
-   If the pointer file does not exist, **read and run `references/setup.md`** before proceeding. This only happens on first use.
-
-3. **Ensure journal root exists.** Use the Read tool to check if `$JOURNAL_ROOT/config.json` exists. If not, use the Write tool to create it (Write creates parent directories automatically):
-   ```json
-   {
-     "default_recap_days": 7,
-     "media_hints_enabled": true
-   }
+3. **Ensure config exists and read it:**
+   ```bash
+   bash ${CLAUDE_SKILL_DIR}/scripts/journal-config.sh "$JOURNAL_ROOT"
    ```
+   Creates `$JOURNAL_ROOT/config.json` with defaults if missing, then outputs its content. Use the output for `default_recap_days` and `media_hints_enabled`.
 
-4. **Read config** from `$CONFIG_PATH` for settings like `default_recap_days` and `media_hints_enabled`.
-
-5. **Read the resource file** for the determined mode and follow its instructions.
+4. **Read the resource file** for the determined mode and follow its instructions.
 
 ---
 
@@ -130,9 +121,16 @@ Agent(subagent_type="journal:journal-worker", run_in_background=true,
 | `references/search.md` | Query parsing, index search, results formatting | MANDATORY for search mode |
 | `references/attach.md` | Media copy, frontmatter linking, index media increment | MANDATORY for attach mode |
 | `references/setup.md` | First-run config, pointer file, auto-journal snippet | MANDATORY for setup mode |
-| `scripts/journal-context.sh` | Date, project, git detection | Run in Before Any Mode step 1 |
-| `scripts/journal-index.js` | Index upsert, media increment, filtered list | Run by append, attach, recap, search |
-| `scripts/journal-attach.sh` | Media file validation and copy | Run by attach mode |
+| `scripts/journal-date.sh` | Current date/time | Before Any Mode step 1 |
+| `scripts/journal-project.sh` | Sanitized project name from cwd | Before Any Mode step 1 |
+| `scripts/journal-git.sh` | Git repo status and project path | Before Any Mode step 1 |
+| `scripts/journal-root.sh` | Resolved journal root path | Before Any Mode step 2 |
+| `scripts/journal-config.sh` | Ensure config exists, output values | Before Any Mode step 3 |
+| `scripts/journal-find-entry.sh` | Find existing entry for today | Append mode step 2 |
+| `scripts/journal-read-entry.sh` | Read existing entry content | Append mode step 2 |
+| `scripts/journal-write-entry.sh` | Write entry file from stdin | Append mode step 4 |
+| `scripts/journal-index.js` | Index upsert, media increment, filtered list | Append, attach, recap, search |
+| `scripts/journal-attach.sh` | Media file validation and copy | Attach mode |
 | `agents/journal-worker.md` | Background auto-journal agent | Spawned by main agent for auto-journaling |
 
 ## Keywords
