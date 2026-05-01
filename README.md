@@ -1,6 +1,6 @@
 # claude-plugins
 
-Claude Code plugins for developer productivity.
+Claude Code plugins for developer productivity. Install once, set up once, then they work in the background — no ongoing effort required.
 
 ## Install
 
@@ -20,7 +20,7 @@ claude plugin install journal@vive-claude
 
 | Plugin | Description |
 |--------|-------------|
-| [journal](plugins/journal/) | Developer journaling — log work, recap progress, search history, attach media |
+| [journal](plugins/journal/) | Automatic developer journaling — captures decisions, architecture, and learnings as you work |
 
 ## License
 

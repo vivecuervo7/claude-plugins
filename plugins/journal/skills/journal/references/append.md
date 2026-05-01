@@ -41,7 +41,11 @@ media:
 
 Omit `media_hints` and `media` entirely when they have no entries. Do not write empty arrays.
 
-**Tags**: Choose from conventions like `architecture`, `bugfix`, `feature`, `refactor`, `config`, `docs`, `blog-worthy`, `demo-worthy`, `reusable`, `exploration`. Use what fits. Only include `blog-worthy` or `demo-worthy` when the work is genuinely interesting or novel.
+**Tags**: Before choosing tags, read the tag registry:
+```bash
+node ${CLAUDE_SKILL_DIR}/scripts/journal-index.js tags "$JOURNAL_ROOT"
+```
+This returns existing tags ordered by frequency (most-used first). **Prefer existing tags** when a candidate is semantically similar — e.g., if `scaffolding` exists, use it instead of `scaffold`; if `testing` exists, use it instead of `test`. New tags are fine when genuinely novel (no similar existing tag covers the concept). Conventions include `architecture`, `bugfix`, `feature`, `refactor`, `config`, `docs`, `blog-worthy`, `demo-worthy`, `reusable`, `exploration` — but these are starting points, not a closed set. Only include `blog-worthy` or `demo-worthy` when the work is genuinely interesting or novel.
 
 **Media hints**: Only include if `media_hints_enabled` is true in config AND the entry has tags like `blog-worthy` or `demo-worthy`. These are prompts for content to capture while context is fresh.
 

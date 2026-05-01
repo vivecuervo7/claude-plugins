@@ -9,7 +9,10 @@ if [ ! -f "$CONFIG" ]; then
   cat > "$CONFIG" << 'EOF'
 {
   "default_recap_days": 7,
-  "media_hints_enabled": true
+  "media_hints_enabled": true,
+  "recap_nudge_enabled": false,
+  "recap_nudge_day": "monday",
+  "recap_nudge_hour": 8
 }
 EOF
 fi

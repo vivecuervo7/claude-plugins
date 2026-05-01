@@ -1,9 +1,1 @@
-{
-  "permissions": {
-    "allow": [
-      "Read",
-      "Write",
-      "Glob"
-    ]
-  }
-}
+{}

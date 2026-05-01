@@ -15,6 +15,48 @@
 const fs = require("fs");
 const path = require("path");
 
+function readTags(tagsPath) {
+  if (fs.existsSync(tagsPath)) {
+    try {
+      return JSON.parse(fs.readFileSync(tagsPath, "utf8"));
+    } catch (e) {
+      return {};
+    }
+  }
+  return {};
+}
+
+function writeTags(tagsPath, tags) {
+  // Sort by count descending for easy consumption
+  const sorted = Object.fromEntries(
+    Object.entries(tags)
+      .sort(([, a], [, b]) => b - a)
+  );
+  fs.writeFileSync(tagsPath, JSON.stringify(sorted, null, 2) + "\n");
+}
+
+function updateTagRegistry(indexPath, oldTags, newTags) {
+  // Derive tags.json path from index: entries/YYYY/MM/index.json -> entries/../../../tags.json
+  const entriesDir = path.dirname(path.dirname(path.dirname(indexPath)));
+  const journalRoot = path.dirname(entriesDir);
+  const tagsPath = path.join(journalRoot, "tags.json");
+  const tags = readTags(tagsPath);
+
+  // Decrement old tags
+  for (const tag of oldTags) {
+    if (tags[tag]) {
+      tags[tag]--;
+      if (tags[tag] <= 0) delete tags[tag];
+    }
+  }
+  // Increment new tags
+  for (const tag of newTags) {
+    tags[tag] = (tags[tag] || 0) + 1;
+  }
+
+  writeTags(tagsPath, tags);
+}
+
 function readIndex(indexPath) {
   if (fs.existsSync(indexPath)) {
     try {
@@ -61,9 +103,12 @@ if (command === "upsert") {
     process.exit(1);
   }
   const data = readIndex(indexPath);
+  const existing = data.entries.find((e) => e.file === entry.file);
+  const oldTags = existing ? (existing.tags || []) : [];
   data.entries = data.entries.filter((e) => e.file !== entry.file);
   data.entries.push(entry);
   writeIndex(indexPath, data);
+  updateTagRegistry(indexPath, oldTags, entry.tags || []);
   console.log(`OK: ${entry.file}`);
 } else if (command === "increment-media") {
   if (!arg) {
@@ -128,6 +173,42 @@ if (command === "upsert") {
     );
   entries.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
   console.log(JSON.stringify(entries, null, 2));
+} else if (command === "tags") {
+  // Read and output current tag registry
+  // indexPath is used as journal root here
+  const tagsPath = path.join(indexPath, "tags.json");
+  const tags = readTags(tagsPath);
+  console.log(JSON.stringify(tags, null, 2));
+} else if (command === "sync-tags") {
+  // Rebuild tags.json from all index files
+  // indexPath is the journal root
+  const entriesDir = path.join(indexPath, "entries");
+  const tags = {};
+  if (fs.existsSync(entriesDir)) {
+    const years = fs.readdirSync(entriesDir).filter((d) =>
+      fs.statSync(path.join(entriesDir, d)).isDirectory()
+    );
+    for (const year of years) {
+      const yearDir = path.join(entriesDir, year);
+      const months = fs.readdirSync(yearDir).filter((d) =>
+        fs.statSync(path.join(yearDir, d)).isDirectory()
+      );
+      for (const month of months) {
+        const idxPath = path.join(yearDir, month, "index.json");
+        if (fs.existsSync(idxPath)) {
+          const data = readIndex(idxPath);
+          for (const entry of data.entries || []) {
+            for (const tag of entry.tags || []) {
+              tags[tag] = (tags[tag] || 0) + 1;
+            }
+          }
+        }
+      }
+    }
+  }
+  const tagsPath = path.join(indexPath, "tags.json");
+  writeTags(tagsPath, tags);
+  console.log(`OK: ${Object.keys(tags).length} tags synced`);
 } else {
   console.error(`ERROR: Unknown command: ${command}`);
   process.exit(1);

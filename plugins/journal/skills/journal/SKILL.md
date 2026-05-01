@@ -44,27 +44,33 @@ CONFIG_PATH  = $JOURNAL_ROOT/config.json
 
 ## Before Any Mode
 
-1. **Gather context** by running the bundled scripts:
-   ```bash
-   bash ${CLAUDE_SKILL_DIR}/scripts/journal-date.sh      # → "YYYY-MM-DD HH:MM"
-   bash ${CLAUDE_SKILL_DIR}/scripts/journal-project.sh   # → project name
-   bash ${CLAUDE_SKILL_DIR}/scripts/journal-git.sh       # → "true/false" then project path
-   ```
-   NEVER use your internal clock for the date.
+Run **only the steps needed** for the determined mode. Minimise tool calls.
 
-2. **Resolve journal root:**
-   ```bash
-   bash ${CLAUDE_SKILL_DIR}/scripts/journal-root.sh
-   ```
-   If the pointer file does not exist (first interactive run), **read and run `references/setup.md`** before proceeding.
+| Step | Append | Attach | Recap | Search | Setup |
+|------|--------|--------|-------|--------|-------|
+| 1. Entry context | Yes | Yes | — | — | — |
+| 2. Journal root | Yes | Yes | Yes | Yes | Yes |
+| 3. Config | Yes | Yes | Yes | Yes | — |
 
-3. **Ensure config exists and read it:**
-   ```bash
-   bash ${CLAUDE_SKILL_DIR}/scripts/journal-config.sh "$JOURNAL_ROOT"
-   ```
-   Creates `$JOURNAL_ROOT/config.json` with defaults if missing, then outputs its content. Use the output for `default_recap_days` and `media_hints_enabled`.
+**Step 1 — Entry context** (append + attach only):
+```bash
+bash ${CLAUDE_SKILL_DIR}/scripts/journal-context.sh
+```
+Outputs four lines: `YYYY-MM-DD HH:MM`, project name, git status (`true`/`false`), working directory. NEVER use your internal clock for the date.
 
-4. **Read the resource file** for the determined mode and follow its instructions.
+**Step 2 — Resolve journal root:**
+```bash
+bash ${CLAUDE_SKILL_DIR}/scripts/journal-root.sh
+```
+If the pointer file does not exist (first interactive run), **read and run `references/setup.md`** before proceeding.
+
+**Step 3 — Ensure config exists and read it:**
+```bash
+bash ${CLAUDE_SKILL_DIR}/scripts/journal-config.sh "$JOURNAL_ROOT"
+```
+Creates `$JOURNAL_ROOT/config.json` with defaults if missing, then outputs its content.
+
+After completing the relevant steps, **read the resource file** for the determined mode and follow its instructions.
 
 ---
 
@@ -73,8 +79,9 @@ CONFIG_PATH  = $JOURNAL_ROOT/config.json
 When invoked as a background auto-journal (spawned by the main agent, not by the user running `/journal`):
 
 1. **No user interaction.** Do not ask questions or use AskUserQuestion. Make reasonable choices autonomously.
-3. **Minimal output.** One confirmation line when complete.
-4. **First-run**: Use default `~/.claude-journal` silently — do not run interactive setup.
+2. **Minimal output.** One confirmation line when complete.
+3. **First-run**: Use default `~/.claude-journal` silently — do not run interactive setup.
+4. **Proportional depth.** Match entry depth to the significance of the work. Rich context from the main agent (decisions, architecture, learnings) warrants a detailed entry with sections. A thin prompt about routine work warrants a brief 1-2 paragraph entry. Do not pad thin work into long entries.
 
 ### Confirmation Format
 
@@ -90,14 +97,7 @@ Journaled: <summary> → entries/YYYY/MM/DD/HH-MM-project.md
 
 ### Enabling Auto-Journal
 
-Run `/journal setup` to enable auto-journaling. Setup will offer to add the required CLAUDE.md snippet automatically.
-
-The snippet spawns the dedicated `journal:journal-worker` agent:
-
-```
-Agent(subagent_type="journal:journal-worker", run_in_background=true,
-  prompt="<what was done>")
-```
+Run `/journal setup` to enable auto-journaling. Setup installs the plugin's `templates/auto-journal.md` to `~/.claude/.vive-claude/journal/CLAUDE.md` and adds an `@./.vive-claude/journal/CLAUDE.md` import to the user's CLAUDE.md. Re-running setup updates the template to the latest version.
 
 ---
 
@@ -120,7 +120,8 @@ Agent(subagent_type="journal:journal-worker", run_in_background=true,
 | `references/recap.md` | Date range querying, narrative recap structure | MANDATORY for recap mode |
 | `references/search.md` | Query parsing, index search, results formatting | MANDATORY for search mode |
 | `references/attach.md` | Media copy, frontmatter linking, index media increment | MANDATORY for attach mode |
-| `references/setup.md` | First-run config, pointer file, auto-journal snippet | MANDATORY for setup mode |
+| `references/setup.md` | First-run config, pointer file, auto-journal import | MANDATORY for setup mode |
+| `templates/auto-journal.md` | Auto-journal CLAUDE.md instructions (installed to ~/.claude/) | Setup mode step 4 |
 | `scripts/journal-date.sh` | Current date/time | Before Any Mode step 1 |
 | `scripts/journal-project.sh` | Sanitized project name from cwd | Before Any Mode step 1 |
 | `scripts/journal-git.sh` | Git repo status and project path | Before Any Mode step 1 |
@@ -130,6 +131,11 @@ Agent(subagent_type="journal:journal-worker", run_in_background=true,
 | `scripts/journal-read-entry.sh` | Read existing entry content | Append mode step 2 |
 | `scripts/journal-write-entry.sh` | Write entry file from stdin | Append mode step 4 |
 | `scripts/journal-index.js` | Index upsert, media increment, filtered list | Append, attach, recap, search |
+| `scripts/journal-recap-range.sh` | Calculate previous completed week (Mon–Sun) | Recap mode (no-args default) |
+| `scripts/journal-recap-html.js` | Generate styled HTML for a single recap | Recap mode step 7 |
+| `scripts/journal-recap-index.js` | Generate recap dashboard (index.html) with all recaps and flagged entries | Recap mode step 7 |
+| `scripts/journal-search-text.sh` | Full-text grep across entry bodies | Search mode (text queries) |
+| `scripts/journal-recap-check.sh` | Check if recap nudge is due | PreToolUse hook (once per day) |
 | `scripts/journal-attach.sh` | Media file validation and copy | Attach mode |
 | `agents/journal-worker.md` | Background auto-journal agent | Spawned by main agent for auto-journaling |
 

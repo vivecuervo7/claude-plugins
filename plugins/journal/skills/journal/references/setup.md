@@ -2,6 +2,15 @@
 
 Runs automatically on first use (when `~/.claude/journal-config.json` doesn't exist), or manually via `/journal setup`.
 
+## Constants
+
+```
+TEMPLATE_PATH = ${CLAUDE_PLUGIN_ROOT}/templates/auto-journal.md
+INSTALL_DIR   = ~/.claude/.vive-claude/journal
+INSTALL_PATH  = ~/.claude/.vive-claude/journal/CLAUDE.md
+IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
+```
+
 ## Steps
 
 1. Ask the user where to store journal entries:
@@ -20,49 +29,23 @@ Runs automatically on first use (when `~/.claude/journal-config.json` doesn't ex
    `<chosen-path>/config.json` — use the default config from SKILL.md "Before Any Mode" step 3.
 
 4. Ask the user if they want to enable auto-journaling:
-   - Yes — add the snippet to CLAUDE.md (Recommended)
+   - Yes — install the auto-journal instructions (Recommended)
    - No — skip for now
 
-   If yes, determine the target CLAUDE.md:
-   - If in a git repo with a project-level `CLAUDE.md`, offer to add it there.
-   - Otherwise, add it to `~/.claude/CLAUDE.md` (global).
+   If yes:
+   1. Create `INSTALL_DIR` if it doesn't exist. Read `TEMPLATE_PATH` and write its contents to `INSTALL_PATH`. If `INSTALL_PATH` already exists, overwrite it (this ensures the latest version is installed).
+   2. Determine the target CLAUDE.md:
+      - If in a git repo with a project-level `CLAUDE.md`, offer to add the import there.
+      - Otherwise, add it to `~/.claude/CLAUDE.md` (global).
+   3. Check if `IMPORT_LINE` already exists in the target CLAUDE.md. If not, append it on its own line.
 
-   Append the following snippet (do not duplicate if it already exists — check first). Write it with no leading indentation:
+5. Ask the user if they want weekly recap reminders:
+   - Yes — set `recap_nudge_enabled` to `true` in `<chosen-path>/config.json`
+   - No — leave as `false` (default)
 
-```markdown
-# Auto-Journal
+   Explain: "When enabled, the journal plugin will check once per day if a recap window has elapsed. If so, it will suggest running `/journal recap`. You can change this anytime in your journal config."
 
-After completing a task — creating files, fixing a bug, implementing a feature,
-scaffolding code, making an architectural decision — journal it. Err on the side
-of journalling too much rather than too little. If in doubt, journal it.
-Agent(subagent_type="journal:journal-worker", run_in_background=true,
-  prompt="<what was done>")
-
-When the journal-worker completes, **always relay its result to the user** in a
-brief message. This surfaces the confirmation and any media hints (e.g.
-"Capture while fresh: ...") so the user can act on them without checking tasks.
-```
-
-5. If auto-journaling was enabled, inform the user about required permissions:
-
-   ```
-   ⚠️  Background auto-journaling requires tool permissions in ~/.claude/settings.json.
-   Add these to your permissions.allow array:
-
-     "Read",
-     "Write",
-     "Edit",
-     "Glob",
-     "Bash(bash **/journal/*/skills/journal/scripts/*)",
-     "Bash(node **/journal/*/skills/journal/scripts/*)"
-
-   Note: Read, Write, Edit, and Glob are global — they apply to all Claude Code
-   activity, not just journaling. The Bash patterns are scoped to journal scripts only.
-   Without these, background journaling will silently fail.
-   Interactive journaling (/journal) works without these permissions.
-   ```
-
-   Do NOT modify settings.json automatically. The user should review and add these themselves.
+   If yes, use the Edit tool to set `"recap_nudge_enabled": true` in the config file.
 
 6. Confirm:
    ```
@@ -70,11 +53,24 @@ brief message. This surfaces the confirmation and any media hints (e.g.
    ```
    If auto-journaling was enabled:
    ```
-   Auto-journaling enabled → <CLAUDE.md path>
+   Auto-journaling enabled → ~/.claude/.vive-claude/journal/CLAUDE.md
+   ```
+   If recap nudges were enabled:
+   ```
+   Recap reminders enabled (weekly, Monday morning)
    ```
 
 ## Re-running Setup
 
 If running setup again (pointer file already exists), show the current settings and offer to change:
 - Storage location (warn that changing does not move existing entries)
-- Auto-journaling (enable/disable, change target CLAUDE.md)
+- Auto-journaling (enable/disable — re-running with "yes" updates the template to the latest version)
+- Recap reminders (enable/disable)
+
+## Migrating from older versions
+
+If the target CLAUDE.md contains either:
+- The old inline auto-journal snippet (look for `# Auto-Journal` followed by `Agent(subagent_type="journal:journal-worker"`)
+- The intermediate `@./auto-journal.md` import
+
+Remove it and replace with `IMPORT_LINE`. If `~/.claude/auto-journal.md` exists (intermediate version), delete it after installing to the new path.
