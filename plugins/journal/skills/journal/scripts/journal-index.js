@@ -1,15 +1,20 @@
 #!/usr/bin/env node
 /**
- * Manages the monthly index.json for journal entries.
+ * Manages the monthly index.json and tag registry for journal entries.
  *
  * Usage:
- *   journal-index.js upsert <index-path> '<json-entry>'
+ *   journal-index.js upsert <index-path>          (entry JSON read from stdin)
  *   journal-index.js increment-media <index-path> <file-field>
- *   journal-index.js list <index-path> [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--project name] [--tag name]
+ *   journal-index.js tags <journal-root>          (output tag registry as JSON)
+ *   journal-index.js sync-tags <journal-root>     (rebuild tag registry from all indexes; recovery tool)
  *
- * upsert: Add or replace an entry matched by its "file" field.
+ * upsert: Add or replace an entry matched by its "file" field. Reading from
+ *   stdin avoids shell-quoting issues with summaries containing single quotes,
+ *   backslashes, or other shell-special characters.
  * increment-media: Increment media_count for the entry matching <file-field>.
- * list: Filter and return entries as JSON. Accepts multiple index paths (comma-separated).
+ * tags: Output the tag registry (frequency map) for the journal root.
+ * sync-tags: Rebuild the tag registry by scanning every monthly index. Useful
+ *   if the registry has drifted (e.g. after manual entry deletion).
  */
 
 const fs = require("fs");
@@ -29,8 +34,7 @@ function readTags(tagsPath) {
 function writeTags(tagsPath, tags) {
   // Sort by count descending for easy consumption
   const sorted = Object.fromEntries(
-    Object.entries(tags)
-      .sort(([, a], [, b]) => b - a)
+    Object.entries(tags).sort(([, a], [, b]) => b - a)
   );
   fs.writeFileSync(tagsPath, JSON.stringify(sorted, null, 2) + "\n");
 }
@@ -42,14 +46,12 @@ function updateTagRegistry(indexPath, oldTags, newTags) {
   const tagsPath = path.join(journalRoot, "tags.json");
   const tags = readTags(tagsPath);
 
-  // Decrement old tags
   for (const tag of oldTags) {
     if (tags[tag]) {
       tags[tag]--;
       if (tags[tag] <= 0) delete tags[tag];
     }
   }
-  // Increment new tags
   for (const tag of newTags) {
     tags[tag] = (tags[tag] || 0) + 1;
   }
@@ -74,125 +76,91 @@ function writeIndex(indexPath, data) {
   fs.writeFileSync(indexPath, JSON.stringify(data, null, 2) + "\n");
 }
 
-const [, , command, indexPath, arg] = process.argv;
+function readStdin() {
+  return fs.readFileSync(0, "utf8");
+}
 
-if (!command || !indexPath) {
-  console.error("Usage: journal-index.js {upsert|increment-media|list} <index-path> <arg>");
+const [, , command, ...rest] = process.argv;
+
+if (!command) {
+  console.error("Usage: journal-index.js {upsert|increment-media|tags|sync-tags} ...");
   process.exit(1);
 }
 
 if (command === "upsert") {
-  if (!arg) {
-    console.error("ERROR: Missing JSON entry argument for upsert");
-    console.error("Usage: journal-index.js upsert <index-path> '<json-entry>'");
+  const [indexPath] = rest;
+  if (!indexPath) {
+    console.error("Usage: journal-index.js upsert <index-path>   (entry JSON read from stdin)");
+    process.exit(1);
+  }
+  const input = readStdin();
+  if (!input.trim()) {
+    console.error("ERROR: No JSON entry received on stdin");
     process.exit(1);
   }
   let entry;
   try {
-    entry = JSON.parse(arg);
+    entry = JSON.parse(input);
   } catch (e) {
-    console.error(`ERROR: Invalid JSON entry: ${e.message}`);
-    console.error(`Received: ${arg}`);
+    console.error(`ERROR: Invalid JSON on stdin: ${e.message}`);
     process.exit(1);
   }
   const required = ["date", "time", "project", "tags", "summary", "file"];
   const missing = required.filter((f) => !(f in entry));
   if (missing.length > 0) {
     console.error(`ERROR: Missing required fields: ${missing.join(", ")}`);
-    console.error(`Required fields: ${required.join(", ")}`);
     process.exit(1);
   }
   const data = readIndex(indexPath);
   const existing = data.entries.find((e) => e.file === entry.file);
-  const oldTags = existing ? (existing.tags || []) : [];
+  const oldTags = existing ? existing.tags || [] : [];
   data.entries = data.entries.filter((e) => e.file !== entry.file);
   data.entries.push(entry);
   writeIndex(indexPath, data);
   updateTagRegistry(indexPath, oldTags, entry.tags || []);
   console.log(`OK: ${entry.file}`);
 } else if (command === "increment-media") {
-  if (!arg) {
-    console.error("ERROR: Missing file-field argument for increment-media");
+  const [indexPath, fileField] = rest;
+  if (!indexPath || !fileField) {
     console.error("Usage: journal-index.js increment-media <index-path> <file-field>");
     process.exit(1);
   }
   const data = readIndex(indexPath);
-  const entry = data.entries.find((e) => e.file === arg);
+  const entry = data.entries.find((e) => e.file === fileField);
   if (!entry) {
     const available = data.entries.map((e) => e.file).join(", ") || "(none)";
-    console.error(`ERROR: No entry found matching file: ${arg}`);
+    console.error(`ERROR: No entry found matching file: ${fileField}`);
     console.error(`Available entries: ${available}`);
     process.exit(1);
   }
   entry.media_count = (entry.media_count || 0) + 1;
   writeIndex(indexPath, data);
-  console.log(`OK: ${arg} media_count=${entry.media_count}`);
-} else if (command === "list") {
-  // indexPath can be comma-separated for multiple index files
-  const paths = indexPath.split(",").map((p) => p.trim());
-  const args = process.argv.slice(4);
-  const filters = {};
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--from" && args[i + 1]) filters.from = args[++i];
-    else if (args[i] === "--to" && args[i + 1]) filters.to = args[++i];
-    else if (args[i] === "--project" && args[i + 1]) filters.project = args[++i];
-    else if (args[i] === "--tag" && args[i + 1]) filters.tag = args[++i];
-  }
-  let entries = [];
-  for (const p of paths) {
-    if (fs.existsSync(p)) {
-      let data;
-      try {
-        data = JSON.parse(fs.readFileSync(p, "utf8"));
-      } catch (e) {
-        console.error(`WARNING: Skipping corrupt index file ${p}: ${e.message}`);
-        continue;
-      }
-      const month = path.basename(path.dirname(p));
-      const year = path.basename(path.dirname(path.dirname(p)));
-      const indexDir = path.dirname(p);
-      entries.push(
-        ...(data.entries || []).map((e) => ({
-          ...e,
-          _index: p,
-          _month: `${year}/${month}`,
-          _path: path.join(indexDir, e.file),
-        }))
-      );
-    }
-  }
-  if (filters.from) entries = entries.filter((e) => e.date >= filters.from);
-  if (filters.to) entries = entries.filter((e) => e.date <= filters.to);
-  if (filters.project)
-    entries = entries.filter(
-      (e) => e.project.toLowerCase() === filters.project.toLowerCase()
-    );
-  if (filters.tag)
-    entries = entries.filter(
-      (e) => Array.isArray(e.tags) && e.tags.includes(filters.tag)
-    );
-  entries.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
-  console.log(JSON.stringify(entries, null, 2));
+  console.log(`OK: ${fileField} media_count=${entry.media_count}`);
 } else if (command === "tags") {
-  // Read and output current tag registry
-  // indexPath is used as journal root here
-  const tagsPath = path.join(indexPath, "tags.json");
-  const tags = readTags(tagsPath);
-  console.log(JSON.stringify(tags, null, 2));
+  const [journalRoot] = rest;
+  if (!journalRoot) {
+    console.error("Usage: journal-index.js tags <journal-root>");
+    process.exit(1);
+  }
+  const tagsPath = path.join(journalRoot, "tags.json");
+  console.log(JSON.stringify(readTags(tagsPath), null, 2));
 } else if (command === "sync-tags") {
-  // Rebuild tags.json from all index files
-  // indexPath is the journal root
-  const entriesDir = path.join(indexPath, "entries");
+  const [journalRoot] = rest;
+  if (!journalRoot) {
+    console.error("Usage: journal-index.js sync-tags <journal-root>");
+    process.exit(1);
+  }
+  const entriesDir = path.join(journalRoot, "entries");
   const tags = {};
   if (fs.existsSync(entriesDir)) {
-    const years = fs.readdirSync(entriesDir).filter((d) =>
-      fs.statSync(path.join(entriesDir, d)).isDirectory()
-    );
+    const years = fs
+      .readdirSync(entriesDir)
+      .filter((d) => fs.statSync(path.join(entriesDir, d)).isDirectory());
     for (const year of years) {
       const yearDir = path.join(entriesDir, year);
-      const months = fs.readdirSync(yearDir).filter((d) =>
-        fs.statSync(path.join(yearDir, d)).isDirectory()
-      );
+      const months = fs
+        .readdirSync(yearDir)
+        .filter((d) => fs.statSync(path.join(yearDir, d)).isDirectory());
       for (const month of months) {
         const idxPath = path.join(yearDir, month, "index.json");
         if (fs.existsSync(idxPath)) {
@@ -206,8 +174,7 @@ if (command === "upsert") {
       }
     }
   }
-  const tagsPath = path.join(indexPath, "tags.json");
-  writeTags(tagsPath, tags);
+  writeTags(path.join(journalRoot, "tags.json"), tags);
   console.log(`OK: ${Object.keys(tags).length} tags synced`);
 } else {
   console.error(`ERROR: Unknown command: ${command}`);

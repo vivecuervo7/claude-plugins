@@ -9,18 +9,9 @@ allowed-tools: Read, Write, Edit, Glob, Bash(bash */scripts/*), Bash(node */scri
 
 Shared playbook for append and attach modes. Loaded by the `journal-append` agent (append) and the `journal-attach` agent (attach). Not user-invocable directly — users reach this functionality through the single `/journal` slash command, which dispatches by its first argument: `attach <file>` → attach agent, `setup` → load `references/setup.md` in the parent session, anything else → append agent.
 
-## Routing
+## Mode
 
-The invoking agent already knows its mode. Load the corresponding reference and follow it:
-
-| Invoking agent | Mode | Resource |
-|---|---|---|
-| `journal-append` | **Append** — journal recent work | `references/append.md` |
-| `journal-attach` | **Attach** — attach media to a journal entry | `references/attach.md` |
-
-Both agents are invoked by the single `/journal` slash command, which dispatches by the first argument token (`attach` → attach agent, anything else → append agent).
-
-Setup is handled differently: `/journal setup` loads `references/setup.md` directly in the parent session (no agent — it edits the user's CLAUDE.md, runs once per machine).
+Each invoking agent has a fixed mode declared in its own frontmatter. Load that mode's reference and follow it: `journal-append` → `references/append.md`, `journal-attach` → `references/attach.md`. Setup is the third entrypoint — loaded directly by `/journal setup` in the parent session (no agent), see `references/setup.md`.
 
 ---
 

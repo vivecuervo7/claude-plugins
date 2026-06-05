@@ -94,12 +94,23 @@ EOF
 
 Extract the summary from the **first paragraph** of the body (first line(s) up to the first blank line, truncated to ~120 chars if needed).
 
-Run the bundled index script to upsert the entry:
+Run the bundled index script to upsert the entry. The script reads the JSON entry from stdin to avoid shell-quoting issues with summaries that contain single quotes, backslashes, or other special characters:
 ```bash
-node ${CLAUDE_SKILL_DIR}/scripts/journal-index.js upsert "$JOURNAL_ROOT/entries/YYYY/MM/index.json" '{"date":"YYYY-MM-DD","time":"HH:MM","project":"<project>","tags":["tag1","tag2"],"summary":"<first paragraph summary>","has_media_hints":false,"media_count":0,"file":"DD/HH-MM-project.md"}'
+node ${CLAUDE_SKILL_DIR}/scripts/journal-index.js upsert "$JOURNAL_ROOT/entries/YYYY/MM/index.json" << 'EOF'
+{
+  "date": "YYYY-MM-DD",
+  "time": "HH:MM",
+  "project": "<project>",
+  "tags": ["tag1", "tag2"],
+  "summary": "<first paragraph summary>",
+  "has_media_hints": false,
+  "media_count": 0,
+  "file": "DD/HH-MM-project.md"
+}
+EOF
 ```
 
-The script handles creating the index file if it doesn't exist and replacing any existing entry with the same `file` value.
+The script creates the index file if it doesn't exist and replaces any existing entry with the same `file` value. The quoted heredoc (`'EOF'`) prevents shell expansion inside the JSON.
 
 ## Step 6: Confirm
 

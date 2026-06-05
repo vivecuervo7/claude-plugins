@@ -11,7 +11,7 @@ claude plugin install journal@vive-claude
 
 ## Setup
 
-Run `/journal setup` once. Setup asks where to store entries (default: `~/.claude-journal`) and offers to enable auto-journaling. Enabling auto-journaling installs instructions into your CLAUDE.md so that Claude journals in the background after completing significant work. The only visible output is a one-line confirmation:
+Run `/journal setup` once. Setup asks where to store entries (default: `~/.claude-journal`) and offers to enable auto-journaling. Enabling auto-journaling installs instructions into your CLAUDE.md so that Claude journals automatically after completing significant work. The only visible output is a one-line confirmation:
 
 ```
 Journaled: Added rate limiting to API endpoints → entries/2026/03/05/14-32-my-api.md
