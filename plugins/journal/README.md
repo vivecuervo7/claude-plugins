@@ -47,6 +47,7 @@ The core value is passive — auto-journaling does the work. The commands below 
 | `/journal [focus]` | Manually journal recent work, optionally with text as the focus/annotation (Haiku, via `journal-append`) |
 | `/journal attach <file> [project]` | Attach media to today's entry (Haiku, via `journal-attach`) |
 | `/journal setup` | Configure storage location and enable auto-journaling (one-time) |
+| `/journal doctor` | Diagnostic checklist — confirms pointer file, auto-journal install, and other expected state |
 
 ## Storage
 

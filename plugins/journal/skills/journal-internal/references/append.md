@@ -6,15 +6,13 @@ Already done in "Before Any Mode". Use the `date`, `time`, `project`, `git_repo`
 
 ## Step 2: Check for Existing Entry Today
 
-```bash
-bash ${CLAUDE_SKILL_DIR}/scripts/journal-find-entry.sh "$JOURNAL_ROOT" "YYYY-MM-DD" "<project>"
+Use the Glob tool to look for an existing entry for this project today:
+
+```
+$JOURNAL_ROOT/entries/YYYY/MM/DD/*-<project>.md
 ```
 
-If a path is returned, this is an **update** — read the existing content and note the filename (preserve the original timestamp):
-
-```bash
-bash ${CLAUDE_SKILL_DIR}/scripts/journal-read-entry.sh "<existing-path>"
-```
+If Glob returns a path, this is an **update** — use the Read tool to load the existing content and note the filename (preserve the original timestamp). If Glob returns no matches, this is a new entry.
 
 ## Step 3: Compose the Entry
 
@@ -79,13 +77,7 @@ Write freeform markdown summarising the work done. Guidelines:
 
 ## Step 4: Write the Entry File
 
-Pass the composed entry to the write script via heredoc:
-
-```bash
-bash ${CLAUDE_SKILL_DIR}/scripts/journal-write-entry.sh "<path>" << 'EOF'
-<full entry content>
-EOF
-```
+Use the Write tool to write the composed entry. The Write tool creates parent directories automatically, so no `mkdir` step is needed.
 
 - **New entry path**: `$JOURNAL_ROOT/entries/YYYY/MM/DD/HH-MM-<project>.md`
 - **Update path**: Same as the existing file (preserving original timestamp)
