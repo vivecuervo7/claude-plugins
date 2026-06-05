@@ -16,7 +16,7 @@ The `<file>` can be an absolute path, a relative path, or `~`-prefixed.
 1. **Find the target entry.** Using today's date:
    - If a project was specified, glob for `$JOURNAL_ROOT/entries/YYYY/MM/DD/*-<project>.md`
    - If not, glob for `$JOURNAL_ROOT/entries/YYYY/MM/DD/*.md` and pick the most recently modified
-   - If no entry exists for today, tell the user: "No journal entry found for today. Run `/journal` first."
+   - If no entry exists for today, stop and emit the no-entry message defined in the agent's Confirmation Format. Do not proceed.
 
 2. **Get a description.** If the media clearly matches a pending media hint in the entry, use that hint's description automatically. Otherwise, ask the user for a brief (one-line) description of what the media shows.
 

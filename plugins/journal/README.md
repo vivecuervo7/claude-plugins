@@ -11,6 +11,10 @@ claude plugin marketplace add vivecuervo7/claude-plugins
 claude plugin install journal@vive-claude
 ```
 
+### Upgrading from 0.4.x
+
+The agent that auto-journal calls was renamed from `journal-worker` to `journal-append`, and the `/journal recap` and `/journal search` modes were removed. After upgrading, **run `/journal setup` once** — it detects the old auto-journal install in your CLAUDE.md and replaces it with the new template. Existing journal entries are untouched.
+
 ## Setup
 
 Run `/journal setup` once. Setup asks where to store entries (default: `~/.claude-journal`) and installs auto-journal instructions into your CLAUDE.md so Claude journals significant work automatically. You can decline the auto-journal install if you want manual-only behaviour, but the default — and the point of the plugin — is hands-off. The only visible output is a one-line confirmation:
@@ -26,11 +30,13 @@ By default, auto-journaling runs in the foreground (the parent session briefly p
 
 ## How It Works
 
-After completing a task, Claude evaluates whether the work involved decisions, non-obvious solutions, architectural choices, or learnings worth preserving. If so, it spawns a lightweight Haiku-pinned agent (`journal-append`) that writes a structured markdown entry with YAML frontmatter (date, project, tags, media hints). One entry per project per day — updates refine the existing entry rather than creating duplicates.
+The plugin ships two Haiku-pinned agents and one slash command:
 
-Manual `/journal` invocations go through the same agent, and `/journal attach <file>` goes through a sibling `journal-attach` agent. Both run on Haiku, so the parent session's model doesn't pay for journaling work.
+- **`journal-append`** writes entries. The main session spawns it after task completion (auto-journal) or when you run `/journal` manually. Either way the parent session doesn't pay for the journaling work — Haiku does.
+- **`journal-attach`** attaches a media file to today's entry, invoked via `/journal attach <file>`.
+- **`/journal`** is the only user-facing command; it dispatches `attach`, `setup`, or falls through to append.
 
-A tag registry tracks tags by frequency, so each new entry reuses existing tags when semantically similar. Tags are the primary navigation mechanism — they're how you (or a future Claude session) find related entries when drafting a blog post. See the Storage section for what else gets written alongside each entry.
+One entry per project per day — updates refine the existing entry rather than creating duplicates. A tag registry tracks tags by frequency so each new entry reuses existing tags when semantically similar. Tags are the primary navigation mechanism for finding related entries later (when drafting a blog post, for example). See the Storage section for the full layout.
 
 ## Manual overrides
 

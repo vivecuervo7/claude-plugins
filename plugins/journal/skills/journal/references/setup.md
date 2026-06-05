@@ -29,8 +29,10 @@ IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
    }
    ```
 
-3. Create the journal root config using the Write tool (creates parent directories automatically):
-   `<chosen-path>/config.json` — use the default config from SKILL.md "Before Any Mode" step 3.
+3. Trigger config creation. The journal root's `config.json` is written automatically the first time `journal-config.sh` runs against the root — no manual content needed here. You can invoke the script once to confirm:
+   ```bash
+   bash ${CLAUDE_SKILL_DIR}/scripts/journal-config.sh "<chosen-path>"
+   ```
 
 4. Install the auto-journal instructions into the user's CLAUDE.md. Confirm once, defaulting to yes — only skip if the user actively declines. Auto-journaling is the core of this plugin; the manual `/journal` command exists only as an escape hatch, so opting out means turning off the plugin's main behaviour.
 
@@ -54,7 +56,7 @@ IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
 
 If running setup again (pointer file already exists), show the current settings and offer to change:
 - Storage location (warn that changing does not move existing entries)
-- Auto-journaling (enable/disable — re-running with "yes" updates the template to the latest version)
+- Auto-journaling (re-running the install action overwrites `INSTALL_PATH` with the latest template; useful for picking up plugin updates without changing the user's CLAUDE.md)
 
 ## Migrating from older versions
 

@@ -77,7 +77,7 @@ After completing these steps, **read the resource file** for your mode and follo
 | `scripts/journal-find-entry.sh` | Find existing entry for today | Append mode |
 | `scripts/journal-read-entry.sh` | Read existing entry content | Append mode |
 | `scripts/journal-write-entry.sh` | Write entry file from stdin | Append mode |
-| `scripts/journal-index.js` | Index upsert, media increment, tag list | Append, attach |
+| `scripts/journal-index.js` | Index upsert, media increment, tag list, tag sync (recovery) | Append, attach |
 | `scripts/journal-attach.sh` | Media file validation and copy | Attach mode |
 | `agents/journal-append.md` | Append agent (Haiku) | Invoked by auto-journal and `/journal` |
 | `agents/journal-attach.md` | Attach agent (Haiku) | Invoked by `/journal attach` |
