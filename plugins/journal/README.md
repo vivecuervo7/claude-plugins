@@ -20,6 +20,8 @@ Journaled: Added rate limiting to API endpoints → entries/2026/03/05/14-32-my-
 
 Routine config changes, simple file additions, and mechanical tasks are skipped automatically — only work worth capturing gets journaled.
 
+By default, auto-journaling runs in the foreground (the parent session briefly pauses while Haiku writes the entry — usually a few seconds). If you'd rather it run non-blocking, edit your installed `~/.claude/.vive-claude/journal/CLAUDE.md` and add `run_in_background=true` to the `Agent(...)` call. Background mode requires the agent's Bash invocations to be pre-approved in your `settings.json`, since background agents can't prompt for permissions — see the comment in that file for details.
+
 ## How It Works
 
 After completing a task, Claude evaluates whether the work involved decisions, non-obvious solutions, architectural choices, or learnings worth preserving. If so, it spawns a lightweight Haiku-pinned agent (`journal-append`) that writes a structured markdown entry with YAML frontmatter (date, project, tags, media hints). One entry per project per day — updates refine the existing entry rather than creating duplicates.
