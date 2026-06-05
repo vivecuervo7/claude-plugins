@@ -1,6 +1,6 @@
 # journal
 
-A developer journaling system for Claude Code. Once enabled, Claude automatically journals significant work — decisions, architectural choices, non-obvious solutions, and learnings — without any manual effort. Entries accumulate over time into a searchable history you can recap, search, and attach media to.
+A developer journaling system for Claude Code. Once enabled, Claude automatically journals significant work — decisions, architectural choices, non-obvious solutions, and learnings — without any manual effort. Entries accumulate over time into a tagged history you can read, draft blog posts from, and attach media to.
 
 ## Install
 
@@ -22,24 +22,24 @@ Routine config changes, simple file additions, and mechanical tasks are skipped 
 
 ## How It Works
 
-After completing a task, Claude evaluates whether the work involved decisions, non-obvious solutions, architectural choices, or learnings worth preserving. If so, it spawns a lightweight background agent that writes a structured markdown entry with YAML frontmatter (date, project, tags, media hints). One entry per project per day — updates refine the existing entry rather than creating duplicates.
+After completing a task, Claude evaluates whether the work involved decisions, non-obvious solutions, architectural choices, or learnings worth preserving. If so, it spawns a lightweight Haiku-pinned agent (`journal-append`) that writes a structured markdown entry with YAML frontmatter (date, project, tags, media hints). One entry per project per day — updates refine the existing entry rather than creating duplicates.
 
-Monthly index files keep queries fast. A tag registry tracks tags by frequency for consistent tagging across entries.
+Manual `/journal` invocations go through the same agent, and `/journal attach <file>` goes through a sibling `journal-attach` agent. Both run on Haiku, so the parent session's model doesn't pay for journaling work.
+
+Monthly index files keep listings fast. A tag registry tracks tags by frequency for consistent tagging across entries. Tags are the primary navigation mechanism — they're how you (or a future Claude session) find related entries when drafting a blog post.
 
 ## Commands
 
-Commands exist for when you want to interact with the journal directly, but the core value is passive.
+The core value is passive — auto-journaling does the work. Commands exist for the manual paths:
+
+A single `/journal` command dispatches by its first argument:
 
 | Command | Description |
 |---------|-------------|
-| `/journal` | Manually journal recent work |
-| `/journal recap` | Narrative summary of the previous week |
-| `/journal recap 3` | Last 3 days |
-| `/journal recap 14 myproj` | Last 14 days, filtered to one project |
-| `/journal search #blog-worthy` | Search by tag |
-| `/journal search "validation"` | Full-text body search |
-| `/journal attach ~/Screenshot.png` | Attach media to today's entry |
-| `/journal setup` | Change storage location or settings |
+| `/journal` | Manually journal recent work (Haiku, via `journal-append`) |
+| `/journal <focus>` | Journal recent work with the text as focus/annotation |
+| `/journal attach <file> [project]` | Attach media to today's entry (Haiku, via `journal-attach`) |
+| `/journal setup` | Configure storage location and enable auto-journaling (one-time) |
 
 ## Storage
 
@@ -49,16 +49,14 @@ Entries live at `~/.claude-journal/` by default. Override during setup or with `
 ~/.claude-journal/
 ├── config.json
 ├── tags.json
-├── entries/
-│   └── 2026/
-│       └── 03/
-│           ├── index.json
-│           └── 05/
-│               ├── 14-32-my-api.md
-│               └── media/
-│                   └── 14-32-my-api-01.png
-└── recaps/
-    └── 2026-04-21--2026-04-28.md
+└── entries/
+    └── 2026/
+        └── 03/
+            ├── index.json
+            └── 05/
+                ├── 14-32-my-api.md
+                └── media/
+                    └── 14-32-my-api-01.png
 ```
 
 Each entry is a standalone markdown file with YAML frontmatter — portable and suitable for blog post generation. Media files are stored alongside entries and referenced from the markdown.
@@ -69,17 +67,17 @@ Each entry is a standalone markdown file with YAML frontmatter — portable and 
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `default_recap_days` | 7 | Days to cover in `/journal recap` when no count is given |
 | `media_hints_enabled` | true | Add media capture prompts to blog-worthy/demo-worthy entries |
-| `recap_nudge_enabled` | false | Show a reminder when a recap window has elapsed |
-| `recap_nudge_day` | `"monday"` | Day of week to trigger the recap nudge |
-| `recap_nudge_hour` | 8 | Hour (24h) at or after which the nudge fires |
 
 ## Tags
 
-Use whatever tags fit. Common conventions:
+Tags are the primary way to find related entries later. Cover three angles when relevant:
 
-`architecture` `bugfix` `feature` `refactor` `config` `docs` `blog-worthy` `demo-worthy` `reusable` `exploration`
+- **Topic / domain** — what the work is about (e.g., `auth`, `rate-limiting`, `journal-plugin`)
+- **Tech** — language, framework, or tool involved (e.g., `typescript`, `react`, `playwright`)
+- **Kind / signal** — nature or blog/demo potential (e.g., `bugfix`, `refactor`, `architecture`, `exploration`, `blog-worthy`, `demo-worthy`)
+
+Use existing tags when semantically similar — the registry shows what's already in use.
 
 ## License
 

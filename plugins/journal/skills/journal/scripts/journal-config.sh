@@ -8,11 +8,7 @@ if [ ! -f "$CONFIG" ]; then
   mkdir -p "$ROOT"
   cat > "$CONFIG" << 'EOF'
 {
-  "default_recap_days": 7,
-  "media_hints_enabled": true,
-  "recap_nudge_enabled": false,
-  "recap_nudge_day": "monday",
-  "recap_nudge_hour": 8
+  "media_hints_enabled": true
 }
 EOF
 fi

@@ -1,6 +1,8 @@
 # Setup Mode
 
-Runs automatically on first use (when `~/.claude/journal-config.json` doesn't exist), or manually via `/journal setup`.
+Loaded by `/journal setup` in the parent session (not via an agent — it edits the user's CLAUDE.md). Typically run once per machine.
+
+For all other entrypoints, first-run uses `~/.claude-journal` silently — setup is not auto-triggered.
 
 ## Constants
 
@@ -39,15 +41,7 @@ IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
       - Otherwise, add it to `~/.claude/CLAUDE.md` (global).
    3. Check if `IMPORT_LINE` already exists in the target CLAUDE.md. If not, append it on its own line.
 
-5. Ask the user if they want weekly recap reminders:
-   - Yes — set `recap_nudge_enabled` to `true` in `<chosen-path>/config.json`
-   - No — leave as `false` (default)
-
-   Explain: "When enabled, the journal plugin will check once per day if a recap window has elapsed. If so, it will suggest running `/journal recap`. You can change this anytime in your journal config."
-
-   If yes, use the Edit tool to set `"recap_nudge_enabled": true` in the config file.
-
-6. Confirm:
+5. Confirm:
    ```
    Journal configured → <chosen-path>
    ```
@@ -55,17 +49,12 @@ IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
    ```
    Auto-journaling enabled → ~/.claude/.vive-claude/journal/CLAUDE.md
    ```
-   If recap nudges were enabled:
-   ```
-   Recap reminders enabled (weekly, Monday morning)
-   ```
 
 ## Re-running Setup
 
 If running setup again (pointer file already exists), show the current settings and offer to change:
 - Storage location (warn that changing does not move existing entries)
 - Auto-journaling (enable/disable — re-running with "yes" updates the template to the latest version)
-- Recap reminders (enable/disable)
 
 ## Migrating from older versions
 
