@@ -1,15 +1,15 @@
 ---
 name: journal-internal
-description: "Internal playbook for the journal plugin. Loaded by the journal-append and journal-attach agents (Haiku), and by the /journal slash command for setup. Not user-invocable directly — named -internal to avoid colliding with the /journal command in the slash-command namespace."
+description: "Internal playbook for the journal plugin. Loaded by the journal-append and journal-attach agents (Haiku) and by the /journal setup flow. Not user-invocable directly."
 user-invocable: false
 allowed-tools: Read, Write, Edit, Glob, Bash(bash */scripts/*), Bash(node */scripts/*)
 ---
 
-# Journal (Internal)
+# Journal (Internal Playbook)
 
 Shared playbook for the append and attach agents. Each invoking agent has a fixed mode declared in its own frontmatter; load that mode's reference and follow it: `journal-append` → `references/append.md`, `journal-attach` → `references/attach.md`. Setup is a third entrypoint — loaded directly by `/journal setup` in the parent session (no agent), see `references/setup.md`.
 
-Not user-invocable. Users reach this functionality through the single `/journal` slash command, which dispatches by its first argument (`attach`, `setup`, or anything else → append).
+Not user-invocable. Users reach this functionality through the `/journal` slash command (a separate user-invocable skill), which dispatches by its first argument and calls the appropriate agent. This skill is the agent's playbook, not the user's entry point.
 
 ---
 
