@@ -2,7 +2,6 @@
 name: journal
 description: "Journal recent work, attach media, run setup, or check install health. The user-facing /journal entry point — dispatches by first argument."
 user-invocable: true
-model: haiku
 argument-hint: "[attach <file> | setup | doctor | <focus text>]"
 allowed-tools: Read, Write, Edit, Bash(bash **/journal/*/skills/journal/scripts/*)
 ---
