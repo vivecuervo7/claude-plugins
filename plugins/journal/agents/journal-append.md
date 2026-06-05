@@ -12,7 +12,7 @@ skills:
 
 Record the work described in your prompt as a single new journal entry. Load the `journal-internal` playbook, run bootstrap, then follow `references/append.md`.
 
-Your prompt is either a summary from the main agent (auto-journal path) or the user's raw `/journal` args (possibly empty, possibly free-text focus).
+Your prompt is a self-contained work summary composed by the calling agent (either auto-journal after a task, or the `/journal` dispatcher summarising the conversation). It's all you have — you have no access to the calling conversation.
 
 - Never use AskUserQuestion. Make reasonable choices autonomously.
 - Match entry depth to prompt depth. Don't pad thin work.
