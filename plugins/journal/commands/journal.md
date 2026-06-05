@@ -7,7 +7,7 @@ Dispatch the user's `/journal` invocation based on `$ARGUMENTS`. Parse only the 
 
 - **First token is `attach`**: call the `journal:journal-attach` agent via the Agent tool. Pass everything after `attach` as the prompt (the file path, optionally followed by a project name). If nothing follows `attach`, tell the user the command needs at least a file path and do not invoke the agent.
 
-- **First token is `setup`**: load the `journal:journal` skill via the Skill tool and follow `references/setup.md`. This runs in the current session (not via an agent) because setup edits the user's CLAUDE.md, which is a parent-session concern. Typically only run once per machine.
+- **First token is `setup`**: load the `journal:journal-internal` skill via the Skill tool and follow `references/setup.md`. This runs in the current session (not via an agent) because setup edits the user's CLAUDE.md, which is a parent-session concern. Typically only run once per machine.
 
 - **Anything else (including empty `$ARGUMENTS`)**: this is an **append** invocation. Call the `journal:journal-append` agent via the Agent tool, passing `$ARGUMENTS` verbatim as the prompt. Empty args are fine — the agent handles a no-args append. Free text is treated as the focus/annotation for the entry.
 

@@ -1,11 +1,11 @@
 ---
-name: journal
-description: "Logs work and attaches media to a developer journal. Loaded by the journal-append and journal-attach agents (Haiku); not user-invocable directly."
+name: journal-internal
+description: "Internal playbook for the journal plugin. Loaded by the journal-append and journal-attach agents (Haiku), and by the /journal slash command for setup. Not user-invocable directly — named -internal to avoid colliding with the /journal command in the slash-command namespace."
 user-invocable: false
 allowed-tools: Read, Write, Edit, Glob, Bash(bash */scripts/*), Bash(node */scripts/*)
 ---
 
-# Journal
+# Journal (Internal)
 
 Shared playbook for the append and attach agents. Each invoking agent has a fixed mode declared in its own frontmatter; load that mode's reference and follow it: `journal-append` → `references/append.md`, `journal-attach` → `references/attach.md`. Setup is a third entrypoint — loaded directly by `/journal setup` in the parent session (no agent), see `references/setup.md`.
 

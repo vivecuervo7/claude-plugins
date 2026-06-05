@@ -5,7 +5,7 @@ model: haiku
 color: green
 tools: ["Read", "Write", "Edit", "Glob", "Bash(bash **/journal/*/skills/journal/scripts/*)", "Bash(node **/journal/*/skills/journal/scripts/*)"]
 skills:
-  - journal:journal
+  - journal:journal-internal
 ---
 
 # Journal Attach Agent
