@@ -2,14 +2,14 @@
 name: journal-internal
 description: "Internal playbook for the journal plugin. Loaded by the journal-append and journal-attach agents (Haiku) and by the /journal setup flow. Not user-invocable directly."
 user-invocable: false
-allowed-tools: Read, Write, Edit, Glob, Bash(bash */scripts/*), Bash(node */scripts/*)
+allowed-tools: Read, Write, Edit, Glob, Bash(bash **/journal/*/skills/journal-internal/scripts/*), Bash(node **/journal/*/skills/journal-internal/scripts/*)
 ---
 
 # Journal (Internal Playbook)
 
-Shared playbook for the append and attach agents. Each invoking agent has a fixed mode declared in its own frontmatter; load that mode's reference and follow it: `journal-append` → `references/append.md`, `journal-attach` → `references/attach.md`. Setup is a third entrypoint — loaded directly by `/journal setup` in the parent session (no agent), see `references/setup.md`.
+Shared playbook for the append and attach agents. Each invoking agent has a fixed mode declared in its own frontmatter; load that mode's reference and follow it: `journal-append` → `references/append.md`, `journal-attach` → `references/attach.md`.
 
-Not user-invocable. Users reach this functionality through the `/journal` slash command (a separate user-invocable skill), which dispatches by its first argument and calls the appropriate agent. This skill is the agent's playbook, not the user's entry point.
+Not user-invocable. Setup and doctor are handled directly by the public `journal` skill — they don't load this playbook. Users reach append and attach functionality through the `/journal` slash command, which dispatches to the corresponding agent (which then loads this skill as its playbook).
 
 ---
 
@@ -69,14 +69,11 @@ After completing these steps, **read the resource file** for your mode and follo
 |------|----------|--------------|
 | `references/append.md` | Entry composition, frontmatter schema, index upsert | MANDATORY for append mode |
 | `references/attach.md` | Media copy, frontmatter linking, index media increment | MANDATORY for attach mode |
-| `references/setup.md` | First-run config, pointer file, auto-journal import | Loaded by `/journal setup` in parent session |
-| `templates/auto-journal.md` | Auto-journal CLAUDE.md instructions (installed to ~/.claude/) | Setup step |
 | `scripts/journal-context.sh` | Date/time, sanitised project name, git status, project path | Before Any Mode step 1 |
 | `scripts/journal-root.sh` | Resolved journal root path | Before Any Mode step 2 |
 | `scripts/journal-config.sh` | Ensure config exists, output values | Before Any Mode step 3 |
 | `scripts/journal-index.js` | Index upsert, media increment, tag list, tag sync (recovery) | Append, attach |
 | `scripts/journal-attach.sh` | Media file validation and copy | Attach mode |
-| `scripts/journal-doctor.sh` | Diagnostic checks for the install | `/journal doctor` |
 | `agents/journal-append.md` | Append agent (Haiku) | Invoked by auto-journal and `/journal` |
 | `agents/journal-attach.md` | Attach agent (Haiku) | Invoked by `/journal attach` |
 

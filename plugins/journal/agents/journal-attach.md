@@ -3,7 +3,7 @@ name: journal-attach
 description: "Attach-mode journal agent. Invoked by `/journal attach <file> [project]` to attach a media file (screenshot, screencast, diagram) to a journal entry. Only handles attach; never handles append or setup."
 model: haiku
 color: green
-tools: ["Read", "Write", "Edit", "Glob", "Bash(bash **/journal/*/skills/journal-internal/scripts/*)", "Bash(node **/journal/*/skills/journal-internal/scripts/*)"]
+tools: ["Read", "Edit", "Glob", "Bash(bash **/journal/*/skills/journal-internal/scripts/*)", "Bash(node **/journal/*/skills/journal-internal/scripts/*)"]
 skills:
   - journal:journal-internal
 ---

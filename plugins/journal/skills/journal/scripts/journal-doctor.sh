@@ -43,21 +43,20 @@ else
   echo "$warn Journal config not yet created — will be auto-created on next journal"
 fi
 
-# 4. Auto-journal install
+# 4. Auto-journal install — check failure indicators first so partial/legacy
+# states surface even if the current agent name also appears in the file.
 INSTALL="$HOME/.claude/.vive-claude/journal/CLAUDE.md"
-if [ -f "$INSTALL" ]; then
-  if grep -q "journal:journal-append" "$INSTALL"; then
-    echo "$ok Auto-journal installed (references journal-append agent)"
-  elif grep -q "journal:journal-worker" "$INSTALL"; then
-    echo "$fail Auto-journal installed but references OLD journal-worker agent"
-    echo "    Remedy: run /journal setup to install the current template"
-  else
-    echo "$warn Auto-journal installed but the agent reference is unrecognised"
-    echo "    Remedy: run /journal setup to reinstall the current template"
-  fi
-else
+if [ ! -f "$INSTALL" ]; then
   echo "$fail Auto-journal not installed at $INSTALL"
   echo "    Remedy: run /journal setup"
+elif grep -q "journal:journal-worker" "$INSTALL"; then
+  echo "$fail Auto-journal installed but references OLD journal-worker agent"
+  echo "    Remedy: run /journal setup to install the current template"
+elif grep -q "journal:journal-append" "$INSTALL"; then
+  echo "$ok Auto-journal installed (references journal-append agent)"
+else
+  echo "$warn Auto-journal installed but the agent reference is unrecognised"
+  echo "    Remedy: run /journal setup to reinstall the current template"
 fi
 
 # 5. Global CLAUDE.md import line

@@ -1,8 +1,8 @@
 # Setup Mode
 
-Loaded by `/journal setup` in the parent session (not via an agent — it edits the user's CLAUDE.md). Typically run once per machine.
+Loaded by `/journal setup` in the parent session. Edits the user's CLAUDE.md and may ask one-time storage-location questions, both of which are parent-session concerns. Typically run once per machine.
 
-For all other entrypoints, first-run uses `~/.claude-journal` silently — setup is not auto-triggered.
+For non-setup entry points, the journal-append agent uses a silent first-run default (`~/.claude-journal`) if no pointer file exists — setup is never auto-triggered.
 
 ## Constants
 
@@ -11,6 +11,7 @@ TEMPLATE_PATH = ${CLAUDE_PLUGIN_ROOT}/templates/auto-journal.md
 INSTALL_DIR   = ~/.claude/.vive-claude/journal
 INSTALL_PATH  = ~/.claude/.vive-claude/journal/CLAUDE.md
 IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
+POINTER_PATH  = ~/.claude/journal-config.json
 ```
 
 ## Steps
@@ -19,7 +20,7 @@ IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
    - `~/.claude-journal` (Recommended)
    - Custom path
 
-   The pointer file (`~/.claude/journal-config.json`) is the canonical source. The `CLAUDE_JOURNAL_ROOT` environment variable is also honoured as a fallback, but the pointer file takes precedence when present — useful for one-off overrides without rewriting config.
+   The pointer file (`POINTER_PATH`) is the canonical source. The `CLAUDE_JOURNAL_ROOT` environment variable is also honoured as a fallback, but the pointer file takes precedence when present.
 
 2. Write the pointer file using the Write tool (creates parent directories automatically):
    `~/.claude/journal-config.json`:
@@ -29,12 +30,7 @@ IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
    }
    ```
 
-3. Trigger config creation. The journal root's `config.json` is written automatically the first time `journal-config.sh` runs against the root — no manual content needed here. You can invoke the script once to confirm:
-   ```bash
-   bash ${CLAUDE_SKILL_DIR}/scripts/journal-config.sh "<chosen-path>"
-   ```
-
-4. Install the auto-journal instructions into the user's CLAUDE.md. Confirm once, defaulting to yes — only skip if the user actively declines. Auto-journaling is the core of this plugin; the manual `/journal` command exists only as an escape hatch, so opting out means turning off the plugin's main behaviour.
+3. Install the auto-journal instructions into the user's CLAUDE.md. Confirm once, defaulting to yes — only skip if the user actively declines. Auto-journaling is the core of this plugin; the manual `/journal` command exists only as an escape hatch, so opting out means turning off the plugin's main behaviour.
 
    If continuing:
    1. Create `INSTALL_DIR` if it doesn't exist. Read `TEMPLATE_PATH` and write its contents to `INSTALL_PATH`. If `INSTALL_PATH` already exists, overwrite it (this ensures the latest version is installed).
@@ -43,7 +39,7 @@ IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
       - Otherwise, add it to `~/.claude/CLAUDE.md` (global).
    3. Check if `IMPORT_LINE` already exists in the target CLAUDE.md. If not, append it on its own line.
 
-5. Confirm:
+4. Confirm:
    ```
    Journal configured → <chosen-path>
    ```
@@ -51,6 +47,8 @@ IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
    ```
    Auto-journaling enabled → ~/.claude/.vive-claude/journal/CLAUDE.md
    ```
+
+The journal root's `config.json` is not created here — the journal-append agent auto-creates it on first append. No setup-side action needed.
 
 ## Re-running Setup
 
