@@ -19,7 +19,7 @@ The agent that auto-journal calls was renamed from `journal-worker` to `journal-
 
 Run `/journal setup` once. Setup asks where to store entries (default: `~/.claude-journal`) and installs auto-journal instructions into your CLAUDE.md so Claude journals significant work automatically. You can decline the install if you want manual-only behaviour, but the default — and the point of the plugin — is hands-off.
 
-By default, auto-journaling runs in the foreground (the parent session briefly pauses while Haiku writes the entry — usually a few seconds). If you'd rather it run non-blocking, edit your installed `~/.claude/.vive-claude/journal/CLAUDE.md` and add `run_in_background=true` to the `Agent(...)` call. Background mode requires the agent's Bash invocations to be pre-approved in your `settings.json`, since background agents can't prompt for permissions — see the comment in that file for details.
+By default, auto-journaling runs in the foreground: the parent session briefly pauses while Haiku writes the entry — usually a few seconds. If you'd rather it run non-blocking, edit your installed `~/.claude/.vive-claude/journal/CLAUDE.md` and add `run_in_background=true` to the `Agent(...)` call. Caveat: background agents in Claude Code cannot prompt for tool permissions, so the agent will silently fail unless the Bash scripts it runs (`journal-context.sh`, `journal-index.js`, etc.) are pre-approved in your `settings.json`. The foreground default is safe everywhere; only switch to background if you've pre-approved those perms.
 
 ## How It Works
 
