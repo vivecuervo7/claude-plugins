@@ -1,82 +1,24 @@
 ---
 name: journal-internal
-description: "Internal playbook for the journal plugin. Loaded by the journal-append and journal-attach agents (Haiku) and by the /journal setup flow. Not user-invocable directly."
+description: "Internal playbook for the journal plugin. Loaded by the journal-append and journal-attach agents (Haiku). Not user-invocable."
 user-invocable: false
 allowed-tools: Read, Write, Edit, Glob, Bash(bash **/journal/*/skills/journal-internal/scripts/*), Bash(node **/journal/*/skills/journal-internal/scripts/*)
 ---
 
 # Journal (Internal Playbook)
 
-Shared playbook for the append and attach agents. Each invoking agent has a fixed mode declared in its own frontmatter; load that mode's reference and follow it: `journal-append` → `references/append.md`, `journal-attach` → `references/attach.md`.
-
-Not user-invocable. Setup and doctor are handled directly by the public `journal` skill — they don't load this playbook. Users reach append and attach functionality through the `/journal` slash command, which dispatches to the corresponding agent (which then loads this skill as its playbook).
-
----
-
-## Constants
-
-```
-POINTER_PATH = ~/.claude/journal-config.json
-```
-
-The pointer file contains `{ "journal_root": "<path>" }` and is the single source of truth for where journal data lives.
-
-```
-JOURNAL_ROOT = read from POINTER_PATH, or env CLAUDE_JOURNAL_ROOT, or ~/.claude-journal
-CONFIG_PATH  = $JOURNAL_ROOT/config.json
-```
-
----
+Shared playbook for the append and attach agents. Each agent loads its own reference: `journal-append` → `references/append.md`, `journal-attach` → `references/attach.md`.
 
 ## Before Any Mode
 
-Run all three steps regardless of mode (append and attach both need entry context and config).
+Run the bootstrap script once. It emits all context as `KEY=VALUE` lines:
 
-**Step 1 — Entry context:**
 ```bash
-bash ${CLAUDE_SKILL_DIR}/scripts/journal-context.sh
+bash ${CLAUDE_SKILL_DIR}/scripts/journal-bootstrap.sh
 ```
-Outputs four lines: `YYYY-MM-DD HH:MM`, sanitised project name, git status (`true`/`false`), project path (git toplevel when in a repo, otherwise cwd). NEVER use your internal clock for the date.
 
-**Step 2 — Resolve journal root:**
-```bash
-bash ${CLAUDE_SKILL_DIR}/scripts/journal-root.sh
-```
-If the pointer file does not exist (first run), use `~/.claude-journal` as the default and create the directory structure silently. Do not invoke interactive setup — that's `/journal setup`'s job.
+Output keys: `DATE`, `TIME`, `PROJECT`, `PROJECT_PATH`, `GIT_REPO`, `JOURNAL_ROOT`, `CONFIG` (single-line JSON). Use these throughout the mode — **never use your internal clock** for the date.
 
-**Step 3 — Ensure config exists and read it:**
-```bash
-bash ${CLAUDE_SKILL_DIR}/scripts/journal-config.sh "$JOURNAL_ROOT"
-```
-Creates `$JOURNAL_ROOT/config.json` with defaults if missing, then outputs its content.
+On first run the script silently creates `~/.claude-journal` and writes a default `config.json`. Interactive setup is the separate `/journal setup` flow.
 
-After completing these steps, **read the resource file** for your mode and follow its instructions.
-
----
-
-## Edge Cases
-
-- **First ever journal**: Use default `~/.claude-journal` silently. Create directory structure and config automatically. Interactive setup is a separate `/journal setup` flow.
-- **Very long entry body on update**: Keep total entry under ~200 lines. Summarise older work if needed to stay concise.
-- **Multiple projects same day**: Each project gets its own file. No conflicts.
-- **Project name with special chars**: Sanitise to lowercase alphanumeric + hyphens for the filename.
-- **Attach with no entry today**: Tell the user to run `/journal` first.
-- **Attach matches media hint**: Auto-fill the description from the hint and check it off.
-
-## References
-
-| File | Contents | When to load |
-|------|----------|--------------|
-| `references/append.md` | Entry composition, frontmatter schema, index upsert | MANDATORY for append mode |
-| `references/attach.md` | Media copy, frontmatter linking, index media increment | MANDATORY for attach mode |
-| `scripts/journal-context.sh` | Date/time, sanitised project name, git status, project path | Before Any Mode step 1 |
-| `scripts/journal-root.sh` | Resolved journal root path | Before Any Mode step 2 |
-| `scripts/journal-config.sh` | Ensure config exists, output values | Before Any Mode step 3 |
-| `scripts/journal-index.js` | Index upsert, media increment, tag list, tag sync (recovery) | Append, attach |
-| `scripts/journal-attach.sh` | Media file validation and copy | Attach mode |
-| `agents/journal-append.md` | Append agent (Haiku) | Invoked by auto-journal and `/journal` |
-| `agents/journal-attach.md` | Attach agent (Haiku) | Invoked by `/journal attach` |
-
-## Keywords
-
-devlog, work log, developer journal, progress tracking, media capture
+Then read your mode's reference file and follow it.

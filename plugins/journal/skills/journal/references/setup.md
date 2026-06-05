@@ -1,14 +1,11 @@
 # Setup Mode
 
-Loaded by `/journal setup` in the parent session. Edits the user's CLAUDE.md and may ask one-time storage-location questions, both of which are parent-session concerns. Typically run once per machine.
-
-For non-setup entry points, the journal-append agent uses a silent first-run default (`~/.claude-journal`) if no pointer file exists — setup is never auto-triggered.
+Loaded by `/journal setup`. Edits the user's CLAUDE.md and may ask one-time storage questions — both parent-session concerns. Typically run once per machine.
 
 ## Constants
 
 ```
 TEMPLATE_PATH = ${CLAUDE_PLUGIN_ROOT}/templates/auto-journal.md
-INSTALL_DIR   = ~/.claude/.vive-claude/journal
 INSTALL_PATH  = ~/.claude/.vive-claude/journal/CLAUDE.md
 IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
 POINTER_PATH  = ~/.claude/journal-config.json
@@ -16,50 +13,27 @@ POINTER_PATH  = ~/.claude/journal-config.json
 
 ## Steps
 
-1. Ask the user where to store journal entries:
-   - `~/.claude-journal` (Recommended)
-   - Custom path
+1. **Ask where to store entries:** `~/.claude-journal` (recommended) or a custom path. The pointer file is canonical; `CLAUDE_JOURNAL_ROOT` env var is honoured only as a fallback.
 
-   The pointer file (`POINTER_PATH`) is the canonical source. The `CLAUDE_JOURNAL_ROOT` environment variable is also honoured as a fallback, but the pointer file takes precedence when present.
-
-2. Write the pointer file using the Write tool (creates parent directories automatically):
-   `~/.claude/journal-config.json`:
+2. **Write the pointer file** (`POINTER_PATH`):
    ```json
-   {
-     "journal_root": "<chosen-path>"
-   }
+   { "journal_root": "<chosen-path>" }
    ```
 
-3. Install the auto-journal instructions into the user's CLAUDE.md. Confirm once, defaulting to yes — only skip if the user actively declines. Auto-journaling is the core of this plugin; the manual `/journal` command exists only as an escape hatch, so opting out means turning off the plugin's main behaviour.
+3. **Install auto-journal instructions.** Confirm once, defaulting to yes — auto-journaling is the plugin's main behaviour, and `/journal` is just the manual escape hatch. If continuing:
+   1. Read `TEMPLATE_PATH` and write to `INSTALL_PATH` (overwrite if it exists, so re-running picks up plugin updates).
+   2. Pick the target CLAUDE.md: project-level if you're in a git repo with one, otherwise `~/.claude/CLAUDE.md`.
+   3. Append `IMPORT_LINE` to it (skip if already present).
 
-   If continuing:
-   1. Create `INSTALL_DIR` if it doesn't exist. Read `TEMPLATE_PATH` and write its contents to `INSTALL_PATH`. If `INSTALL_PATH` already exists, overwrite it (this ensures the latest version is installed).
-   2. Determine the target CLAUDE.md:
-      - If in a git repo with a project-level `CLAUDE.md`, offer to add the import there.
-      - Otherwise, add it to `~/.claude/CLAUDE.md` (global).
-   3. Check if `IMPORT_LINE` already exists in the target CLAUDE.md. If not, append it on its own line.
-
-4. Confirm:
+4. **Confirm:**
    ```
    Journal configured → <chosen-path>
-   ```
-   If auto-journaling was enabled:
-   ```
    Auto-journaling enabled → ~/.claude/.vive-claude/journal/CLAUDE.md
    ```
+   (Omit the second line if auto-journaling was declined.)
 
-The journal root's `config.json` is not created here — the journal-append agent auto-creates it on first append. No setup-side action needed.
+The journal root's `config.json` is created lazily by the append agent's bootstrap — nothing to do here.
 
-## Re-running Setup
+## Re-running
 
-If running setup again (pointer file already exists), show the current settings and offer to change:
-- Storage location (warn that changing does not move existing entries)
-- Auto-journaling (re-running the install action overwrites `INSTALL_PATH` with the latest template; useful for picking up plugin updates without changing the user's CLAUDE.md)
-
-## Migrating from older versions
-
-If the target CLAUDE.md contains either:
-- The old inline auto-journal snippet (look for `# Auto-Journal` followed by `Agent(subagent_type="journal:journal-worker"`)
-- The intermediate `@./auto-journal.md` import
-
-Remove it and replace with `IMPORT_LINE`. If `~/.claude/auto-journal.md` exists (intermediate version), delete it after installing to the new path.
+If the pointer file already exists, show current settings and offer to change the storage location (warn: doesn't move existing entries) or reinstall the template.

@@ -59,13 +59,17 @@ function updateTagRegistry(indexPath, oldTags, newTags) {
   writeTags(tagsPath, tags);
 }
 
-function readIndex(indexPath) {
+function readIndex(indexPath, { strict = true } = {}) {
   if (fs.existsSync(indexPath)) {
     try {
       return JSON.parse(fs.readFileSync(indexPath, "utf8"));
     } catch (e) {
-      console.error(`ERROR: Corrupt index file at ${indexPath}: ${e.message}`);
-      process.exit(1);
+      if (strict) {
+        console.error(`ERROR: Corrupt index file at ${indexPath}: ${e.message}`);
+        process.exit(1);
+      }
+      console.error(`WARN: Skipping corrupt index ${indexPath}: ${e.message}`);
+      return null;
     }
   }
   return { version: 1, entries: [] };
@@ -164,7 +168,8 @@ if (command === "upsert") {
       for (const month of months) {
         const idxPath = path.join(yearDir, month, "index.json");
         if (fs.existsSync(idxPath)) {
-          const data = readIndex(idxPath);
+          const data = readIndex(idxPath, { strict: false });
+          if (!data) continue;
           for (const entry of data.entries || []) {
             for (const tag of entry.tags || []) {
               tags[tag] = (tags[tag] || 0) + 1;
