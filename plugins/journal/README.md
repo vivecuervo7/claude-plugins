@@ -63,6 +63,8 @@ Entries live at `~/.claude-journal/` by default. Override during setup or with `
 
 Each entry is a standalone markdown file with YAML frontmatter — portable and suitable for blog post generation. Media files are stored alongside entries and referenced from the markdown.
 
+`entries/YYYY/MM/index.json` holds a per-entry summary (date, project, tags, summary, file path, media count) for every entry in that month. `tags.json` is a frequency map of every tag in use. The plugin maintains both on every append; nothing in the plugin currently reads them back, but they're cheap, intentional artefacts for external consumers — for example a future Claude session drafting a blog post can scan one JSON file instead of opening every entry.
+
 ## Configuration
 
 `~/.claude-journal/config.json` is created automatically on first use:

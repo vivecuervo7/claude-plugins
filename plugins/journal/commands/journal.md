@@ -1,6 +1,6 @@
 ---
 description: Journal recent work, attach media, or run setup
-argument-hint: "[attach <file> [project] | setup | <focus text>]"
+argument-hint: "[attach <file> | setup | <focus text>]"
 ---
 
 Dispatch the user's `/journal` invocation based on `$ARGUMENTS`. Parse only the **first whitespace-separated token**:

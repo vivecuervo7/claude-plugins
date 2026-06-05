@@ -19,6 +19,8 @@ IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
    - `~/.claude-journal` (Recommended)
    - Custom path
 
+   The pointer file (`~/.claude/journal-config.json`) is the canonical source. The `CLAUDE_JOURNAL_ROOT` environment variable is also honoured as a fallback, but the pointer file takes precedence when present — useful for one-off overrides without rewriting config.
+
 2. Write the pointer file using the Write tool (creates parent directories automatically):
    `~/.claude/journal-config.json`:
    ```json
