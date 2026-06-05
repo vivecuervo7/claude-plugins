@@ -1,6 +1,26 @@
 # Append Mode
 
-Create a new journal entry for the work described in your prompt. Always write a new file — never look for or merge with prior entries.
+Create a new journal entry for the work described in your prompt.
+
+## Step 0: Dedup Against Today's Entries
+
+Before writing anything, glob today's existing entries for this project:
+
+```
+$JOURNAL_ROOT/entries/YYYY/MM/DD/*-<PROJECT>.md
+```
+
+If any matches exist, read them and compare with your prompt:
+
+- **Fully covered** — every meaningful claim in the prompt is already present in an existing entry. Skip writing. Output:
+  ```
+  Skipped: nothing new since entries/YYYY/MM/DD/HH-MM-<project>.md
+  ```
+  Stop here — do not write a new file or touch the index.
+- **Partially covered** — some of the prompt is new. Write a new entry covering only the un-captured delta. Don't restate what's already in earlier entries.
+- **Nothing covered** — write the entry as-is.
+
+This keeps repeated `/journal` invocations idempotent. Auto-journal invocations rarely hit this (they fire after distinct tasks), but manual invocations often do.
 
 ## Step 1: Compose Frontmatter
 

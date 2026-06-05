@@ -19,16 +19,19 @@ Your prompt is a self-contained work summary composed by the calling agent (eith
 
 ## Confirmation Format
 
-Your final output is the ONLY thing the user sees. Always use:
+Your final output is the ONLY thing the user sees. Use one of:
 
+**Wrote a new entry:**
 ```
 Journaled: <summary> → entries/YYYY/MM/DD/HH-MM-project.md
 ```
 
-If the entry has `media_hints`, append one line per hint:
-
+If the entry has `media_hints`, append one line per hint (never omit — they surface time-sensitive capture opportunities):
 ```
   📷 Capture while fresh: <description>
 ```
 
-Never omit hint lines — they surface time-sensitive capture opportunities.
+**Skipped because today's entries already cover the prompt** (from Step 0 dedup):
+```
+Skipped: nothing new since entries/YYYY/MM/DD/HH-MM-project.md
+```

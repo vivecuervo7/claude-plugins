@@ -1,7 +1,7 @@
 {
   "name": "journal",
   "description": "A developer journaling system for Claude Code — log work and attach media, automatically or on demand",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "author": {
     "name": "Isaac Dedini"
   },

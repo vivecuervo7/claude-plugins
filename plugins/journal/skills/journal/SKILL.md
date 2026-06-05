@@ -16,12 +16,13 @@ The user-facing `/journal` entry point. Parse only the **first whitespace-separa
 
 - **First token is `doctor`**: run `bash ${CLAUDE_SKILL_DIR}/scripts/journal-doctor.sh` and relay its checklist output verbatim. Read-only diagnostic that confirms pointer file, journal root, config, auto-journal install, and global CLAUDE.md import are all wired up. Add no commentary unless a check fails, in which case quote the remedy line beside the failure.
 
-- **Anything else (free text, or empty)**: the agent runs in its own Haiku context and cannot see this conversation, so **you** (the dispatching agent) must compose the prompt before calling it. The agent has only what you pass.
+- **Anything else (free text, or empty)**: the Haiku agent can't see this conversation — only the prompt you pass. **You** must read the conversation and compose a summary of the work worth journaling. That's your only job here; do not run scripts, glob filesystems, or read existing entries (the agent does its own bootstrap and dedups against today's entries before writing).
 
-  1. Resolve the project's existing entries for today: glob `$JOURNAL_ROOT/entries/YYYY/MM/DD/*-<project>.md` (resolve `$JOURNAL_ROOT` via `bash ${CLAUDE_PLUGIN_ROOT}/skills/journal-internal/scripts/journal-root.sh`; get today's date and project via `bash ${CLAUDE_PLUGIN_ROOT}/skills/journal-internal/scripts/journal-bootstrap.sh`). If any exist, read them so you know what's already captured.
-  2. Look back over the current conversation and write a self-contained summary of work worth journaling that **isn't** already captured in those entries.
-  3. If `$ARGUMENTS` is non-empty, treat it as focus/annotation — weave it in or let it shape what you emphasise.
-  4. Pass the composed summary as the agent's prompt. If nothing meaningful is left to journal, tell the user and skip the agent.
+  - Compose a self-contained prose summary covering decisions, non-obvious solutions, architectural choices, and learnings. Don't hand the agent a one-liner — give it enough substance that it can write a useful entry without seeing the conversation.
+  - If `$ARGUMENTS` is non-empty, treat it as focus/annotation — let it shape what you emphasise.
+  - Pass the summary as the agent's prompt. The agent decides whether to write, skip (already covered), or write a delta entry, and returns one of:
+    - `Journaled: …` (new entry written)
+    - `Skipped: nothing new since <existing-file>` (fully covered by today's entries)
 
 When an agent returns, relay its confirmation output to the user verbatim, including any "📷 Capture while fresh" media-hint lines for append or the "Attached:" line for attach.
 
