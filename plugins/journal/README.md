@@ -17,20 +17,20 @@ The agent that auto-journal calls was renamed from `journal-worker` to `journal-
 
 ## Setup
 
-Run `/journal setup` once. Setup asks where to store entries (default: `~/.claude-journal`) and installs auto-journal instructions into your CLAUDE.md so Claude journals significant work automatically. You can decline the auto-journal install if you want manual-only behaviour, but the default — and the point of the plugin — is hands-off. The only visible output is a one-line confirmation:
+Run `/journal setup` once. Setup asks where to store entries (default: `~/.claude-journal`) and installs auto-journal instructions into your CLAUDE.md so Claude journals significant work automatically. You can decline the install if you want manual-only behaviour, but the default — and the point of the plugin — is hands-off.
+
+By default, auto-journaling runs in the foreground (the parent session briefly pauses while Haiku writes the entry — usually a few seconds). If you'd rather it run non-blocking, edit your installed `~/.claude/.vive-claude/journal/CLAUDE.md` and add `run_in_background=true` to the `Agent(...)` call. Background mode requires the agent's Bash invocations to be pre-approved in your `settings.json`, since background agents can't prompt for permissions — see the comment in that file for details.
+
+## How It Works
+
+When auto-journal fires, all you see is a one-line confirmation:
 
 ```
 Journaled: Added rate limiting to API endpoints → entries/2026/03/05/14-32-my-api.md
   📷 Capture while fresh: rate limiter dashboard showing request throttling
 ```
 
-Routine config changes, simple file additions, and mechanical tasks are skipped automatically — only work worth capturing gets journaled.
-
-By default, auto-journaling runs in the foreground (the parent session briefly pauses while Haiku writes the entry — usually a few seconds). If you'd rather it run non-blocking, edit your installed `~/.claude/.vive-claude/journal/CLAUDE.md` and add `run_in_background=true` to the `Agent(...)` call. Background mode requires the agent's Bash invocations to be pre-approved in your `settings.json`, since background agents can't prompt for permissions — see the comment in that file for details.
-
-## How It Works
-
-The plugin ships two Haiku-pinned agents and one slash command:
+Under the hood, the plugin ships two Haiku-pinned agents and one slash command:
 
 - **`journal-append`** writes entries. The main session spawns it after task completion (auto-journal) or when you run `/journal` manually. Either way the parent session doesn't pay for the journaling work — Haiku does.
 - **`journal-attach`** attaches a media file to today's entry, invoked via `/journal attach <file>`.
@@ -68,7 +68,7 @@ Entries live at `~/.claude-journal/` by default. Override during setup or with `
 
 Each entry is a standalone markdown file with YAML frontmatter — portable and suitable for blog post generation. Media files are stored alongside entries and referenced from the markdown.
 
-`entries/YYYY/MM/index.json` holds a per-entry summary (date, project, tags, summary, file path, media count) for every entry in that month. `tags.json` is a frequency map of every tag in use. The plugin maintains both on every append; nothing in the plugin currently reads them back, but they're cheap, intentional artefacts for external consumers — for example a future Claude session drafting a blog post can scan one JSON file instead of opening every entry.
+`entries/YYYY/MM/index.json` holds a per-entry summary (date, project, tags, summary, file path, media count) for every entry in that month. `tags.json` is a frequency map of every tag in use. The plugin maintains both on every append, by design — they're artefacts for external consumers, not internal infrastructure. A future Claude session drafting a blog post can scan one JSON file instead of opening every entry.
 
 ## Configuration
 
