@@ -5,8 +5,7 @@ set -uo pipefail
 ok="✓"; fail="✗"; warn="?"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ROOT_HELPER="$SCRIPT_DIR/../../journal-internal/scripts/journal-root.sh"
-ROOT=$(bash "$ROOT_HELPER")
+ROOT=$(bash "$SCRIPT_DIR/journal-root.sh")
 
 echo "Journal plugin doctor"
 echo "====================="

@@ -46,7 +46,7 @@ Use the `DATE`, `TIME`, `PROJECT`, `PROJECT_PATH`, `GIT_REPO` values from bootst
 Tags are the primary way future-you finds related entries. Before choosing, read the registry:
 
 ```bash
-node ${CLAUDE_SKILL_DIR}/scripts/journal-index.js tags "$JOURNAL_ROOT"
+node ${CLAUDE_PLUGIN_ROOT}/scripts/journal-index.js tags "$JOURNAL_ROOT"
 ```
 
 It returns existing tags ordered by frequency. **Prefer an existing tag** when one covers the concept (e.g. use `scaffolding` rather than coining `scaffold`). Cover three angles when relevant:
@@ -84,7 +84,7 @@ Path: `$JOURNAL_ROOT/entries/YYYY/MM/DD/HH-MM-<project>.md` (Write creates paren
 Pass the entry JSON on stdin (avoids quoting issues with special chars in the summary):
 
 ```bash
-node ${CLAUDE_SKILL_DIR}/scripts/journal-index.js upsert "$JOURNAL_ROOT/entries/YYYY/MM/index.json" << 'EOF'
+node ${CLAUDE_PLUGIN_ROOT}/scripts/journal-index.js upsert "$JOURNAL_ROOT/entries/YYYY/MM/index.json" << 'EOF'
 {
   "date": "YYYY-MM-DD",
   "time": "HH:MM",

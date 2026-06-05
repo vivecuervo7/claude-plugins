@@ -15,7 +15,7 @@ Prompt format: `<file>` or `<file> <project>`. The file path may be absolute, re
 
 3. **Copy the file** into journal storage:
    ```bash
-   bash ${CLAUDE_SKILL_DIR}/scripts/journal-attach.sh "<source>" "$JOURNAL_ROOT/entries/YYYY/MM/DD/media" "<entry-stem>-<NN>.<ext>"
+   bash ${CLAUDE_PLUGIN_ROOT}/scripts/journal-attach.sh "<source>" "$JOURNAL_ROOT/entries/YYYY/MM/DD/media" "<entry-stem>-<NN>.<ext>"
    ```
    - `<entry-stem>` = entry filename without `.md` (e.g. `14-32-my-api`)
    - `<NN>` = next sequential index (01, 02, …) based on existing media for this entry
@@ -35,7 +35,7 @@ Prompt format: `<file>` or `<file> <project>`. The file path may be absolute, re
 
 5. **Increment media count in the index:**
    ```bash
-   node ${CLAUDE_SKILL_DIR}/scripts/journal-index.js increment-media "$JOURNAL_ROOT/entries/YYYY/MM/index.json" "DD/HH-MM-project.md"
+   node ${CLAUDE_PLUGIN_ROOT}/scripts/journal-index.js increment-media "$JOURNAL_ROOT/entries/YYYY/MM/index.json" "DD/HH-MM-project.md"
    ```
 
 6. **Confirm** using the agent's format.
