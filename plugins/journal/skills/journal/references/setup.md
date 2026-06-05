@@ -32,11 +32,11 @@ IMPORT_LINE   = @./.vive-claude/journal/CLAUDE.md
 3. Create the journal root config using the Write tool (creates parent directories automatically):
    `<chosen-path>/config.json` — use the default config from SKILL.md "Before Any Mode" step 3.
 
-4. Ask the user if they want to enable auto-journaling:
-   - Yes — install the auto-journal instructions (Recommended)
-   - No — skip for now
+4. Install auto-journaling. Auto-journaling is the core of this plugin — the manual `/journal` command exists only as an escape hatch — so this step always runs unless the user explicitly opts out.
 
-   If yes:
+   Tell the user: "Installing auto-journal instructions into your CLAUDE.md so Claude journals significant work automatically. Continue?" Default is yes. Only skip if the user says no.
+
+   If continuing:
    1. Create `INSTALL_DIR` if it doesn't exist. Read `TEMPLATE_PATH` and write its contents to `INSTALL_PATH`. If `INSTALL_PATH` already exists, overwrite it (this ensures the latest version is installed).
    2. Determine the target CLAUDE.md:
       - If in a git repo with a project-level `CLAUDE.md`, offer to add the import there.

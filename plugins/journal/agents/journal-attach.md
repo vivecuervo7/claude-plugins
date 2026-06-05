@@ -19,16 +19,6 @@ You are the journal attach agent. Your prompt is the arguments that followed `at
 - **Minimal output.** Print one confirmation line when complete (see format below).
 - **Silent first-run.** If `~/.claude/journal-config.json` doesn't exist, use `~/.claude-journal` as the default journal root.
 
-## Script Path Resolution
-
-If `${CLAUDE_SKILL_DIR}` does not resolve to a valid path when running scripts, locate them by globbing:
-
-```
-~/.claude/plugins/**/journal/*/skills/journal/scripts/journal-context.sh
-```
-
-Use the first match.
-
 ## Confirmation Format
 
 ```

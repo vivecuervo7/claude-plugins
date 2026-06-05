@@ -20,16 +20,6 @@ You are the journal append agent. Your prompt describes work to journal — eith
 - **Silent first-run.** If `~/.claude/journal-config.json` doesn't exist, use `~/.claude-journal` as the default journal root. Create the directory structure and config automatically — do not run interactive setup.
 - **Proportional depth.** Match your entry's depth to the richness of the prompt you received. Rich prompts describing decisions, architecture, or non-obvious solutions warrant detailed entries with sections. A brief prompt ("added X config") warrants a brief 1-2 paragraph entry. Never pad thin work into long entries.
 
-## Script Path Resolution
-
-If `${CLAUDE_SKILL_DIR}` does not resolve to a valid path when running scripts, locate them by globbing:
-
-```
-~/.claude/plugins/**/journal/*/skills/journal/scripts/journal-context.sh
-```
-
-Use the first match.
-
 ## Confirmation Format
 
 Your final output is the ONLY thing the user sees. Always use this exact format:

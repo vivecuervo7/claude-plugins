@@ -1,6 +1,8 @@
 # journal
 
-A developer journaling system for Claude Code. Once enabled, Claude automatically journals significant work — decisions, architectural choices, non-obvious solutions, and learnings — without any manual effort. Entries accumulate over time into a tagged history you can read, draft blog posts from, and attach media to.
+An **auto-journaling system** for Claude Code. After significant tasks, Claude writes a structured entry for you — no commands to remember, no manual triggers, no context-switching. Entries accumulate over time into a tagged history you can read directly or hand to a future Claude session to draft a blog post from.
+
+Manual hooks exist for adding focus to a fresh entry or attaching media after the fact, but they're escape hatches. The core value is that you don't have to do anything.
 
 ## Install
 
@@ -30,11 +32,9 @@ Manual `/journal` invocations go through the same agent, and `/journal attach <f
 
 Monthly index files keep listings fast. A tag registry tracks tags by frequency for consistent tagging across entries. Tags are the primary navigation mechanism — they're how you (or a future Claude session) find related entries when drafting a blog post.
 
-## Commands
+## Manual overrides
 
-The core value is passive — auto-journaling does the work. Commands exist for the manual paths:
-
-A single `/journal` command dispatches by its first argument:
+The core value is passive — auto-journaling does the work. The commands below exist only for the escape-hatch cases: adding focus to an entry the agent didn't quite frame the way you wanted, attaching media after the fact, or running the one-time setup. A single `/journal` command dispatches by its first argument:
 
 | Command | Description |
 |---------|-------------|
