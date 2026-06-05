@@ -7,11 +7,9 @@ allowed-tools: Read, Write, Edit, Glob, Bash(bash */scripts/*), Bash(node */scri
 
 # Journal
 
-Shared playbook for append and attach modes. Loaded by the `journal-append` agent (append) and the `journal-attach` agent (attach). Not user-invocable directly — users reach this functionality through the single `/journal` slash command, which dispatches by its first argument: `attach <file>` → attach agent, `setup` → load `references/setup.md` in the parent session, anything else → append agent.
+Shared playbook for the append and attach agents. Each invoking agent has a fixed mode declared in its own frontmatter; load that mode's reference and follow it: `journal-append` → `references/append.md`, `journal-attach` → `references/attach.md`. Setup is a third entrypoint — loaded directly by `/journal setup` in the parent session (no agent), see `references/setup.md`.
 
-## Mode
-
-Each invoking agent has a fixed mode declared in its own frontmatter. Load that mode's reference and follow it: `journal-append` → `references/append.md`, `journal-attach` → `references/attach.md`. Setup is the third entrypoint — loaded directly by `/journal setup` in the parent session (no agent), see `references/setup.md`.
+Not user-invocable. Users reach this functionality through the single `/journal` slash command, which dispatches by its first argument (`attach`, `setup`, or anything else → append).
 
 ---
 
@@ -38,7 +36,7 @@ Run all three steps regardless of mode (append and attach both need entry contex
 ```bash
 bash ${CLAUDE_SKILL_DIR}/scripts/journal-context.sh
 ```
-Outputs four lines: `YYYY-MM-DD HH:MM`, project name, git status (`true`/`false`), working directory. NEVER use your internal clock for the date.
+Outputs four lines: `YYYY-MM-DD HH:MM`, sanitised project name, git status (`true`/`false`), project path (git toplevel when in a repo, otherwise cwd). NEVER use your internal clock for the date.
 
 **Step 2 — Resolve journal root:**
 ```bash
@@ -73,7 +71,7 @@ After completing these steps, **read the resource file** for your mode and follo
 | `references/attach.md` | Media copy, frontmatter linking, index media increment | MANDATORY for attach mode |
 | `references/setup.md` | First-run config, pointer file, auto-journal import | Loaded by `/journal setup` in parent session |
 | `templates/auto-journal.md` | Auto-journal CLAUDE.md instructions (installed to ~/.claude/) | Setup step |
-| `scripts/journal-context.sh` | Date/time, project, git status, working dir | Before Any Mode step 1 |
+| `scripts/journal-context.sh` | Date/time, sanitised project name, git status, project path | Before Any Mode step 1 |
 | `scripts/journal-root.sh` | Resolved journal root path | Before Any Mode step 2 |
 | `scripts/journal-config.sh` | Ensure config exists, output values | Before Any Mode step 3 |
 | `scripts/journal-find-entry.sh` | Find existing entry for today | Append mode |

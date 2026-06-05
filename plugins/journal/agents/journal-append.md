@@ -3,7 +3,7 @@ name: journal-append
 description: "Append-mode journal agent (Haiku-pinned). Invoked by the main agent for auto-journaling after task completion, and by `/journal` (no args, or free-text args) for user-initiated appends. Always appends; never handles attach or setup."
 model: haiku
 color: green
-tools: ["Read", "Write", "Glob", "Bash(bash **/journal/*/skills/journal/scripts/*)", "Bash(node **/journal/*/skills/journal/scripts/*)"]
+tools: ["Read", "Write", "Bash(bash **/journal/*/skills/journal/scripts/*)", "Bash(node **/journal/*/skills/journal/scripts/*)"]
 skills:
   - journal:journal
 ---

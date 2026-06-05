@@ -13,7 +13,7 @@ claude plugin install journal@vive-claude
 
 ## Setup
 
-Run `/journal setup` once. Setup asks where to store entries (default: `~/.claude-journal`) and offers to enable auto-journaling. Enabling auto-journaling installs instructions into your CLAUDE.md so that Claude journals automatically after completing significant work. The only visible output is a one-line confirmation:
+Run `/journal setup` once. Setup asks where to store entries (default: `~/.claude-journal`) and installs auto-journal instructions into your CLAUDE.md so Claude journals significant work automatically. You can decline the auto-journal install if you want manual-only behaviour, but the default — and the point of the plugin — is hands-off. The only visible output is a one-line confirmation:
 
 ```
 Journaled: Added rate limiting to API endpoints → entries/2026/03/05/14-32-my-api.md
@@ -30,7 +30,7 @@ After completing a task, Claude evaluates whether the work involved decisions, n
 
 Manual `/journal` invocations go through the same agent, and `/journal attach <file>` goes through a sibling `journal-attach` agent. Both run on Haiku, so the parent session's model doesn't pay for journaling work.
 
-Monthly index files keep listings fast. A tag registry tracks tags by frequency for consistent tagging across entries. Tags are the primary navigation mechanism — they're how you (or a future Claude session) find related entries when drafting a blog post.
+A tag registry tracks tags by frequency, so each new entry reuses existing tags when semantically similar. Tags are the primary navigation mechanism — they're how you (or a future Claude session) find related entries when drafting a blog post. See the Storage section for what else gets written alongside each entry.
 
 ## Manual overrides
 

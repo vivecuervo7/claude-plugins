@@ -2,7 +2,7 @@
 
 ## Step 1: Detect Project
 
-Already done in "Before Any Mode". Use the `date`, `time`, `project`, `git_repo`, and `project_path` values from those scripts.
+Already done in "Before Any Mode". Use the `date`, `time`, `project`, `git_repo`, and `project_path` values from `journal-context.sh`.
 
 ## Step 2: Check for Existing Entry Today
 
@@ -25,7 +25,7 @@ bash ${CLAUDE_SKILL_DIR}/scripts/journal-read-entry.sh "<existing-path>"
 date: "YYYY-MM-DD"
 time: "HH:MM"
 project: <project-name>
-path: <working-directory>
+path: <project-path>
 git_repo: true|false
 tags: [<relevant-tags>]
 # Only include media_hints when blog-worthy/demo-worthy and media_hints_enabled:
