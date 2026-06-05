@@ -1,8 +1,8 @@
 # journal
 
-An **auto-journaling system** for Claude Code. After significant tasks, Claude writes a structured entry for you — no commands to remember, no manual triggers, no context-switching. Entries accumulate over time into a tagged history you can read directly or hand to a future Claude session to draft a blog post from.
+An auto-journaling plugin for Claude Code. After significant tasks — decisions, non-obvious solutions, architectural choices, learnings — Claude writes a structured markdown entry for you on Haiku, in a sub-context that doesn't pollute your main session. Entries accumulate as a tagged history you can read directly or hand to a future Claude session to draft a blog post from. Routine work is skipped automatically.
 
-Manual hooks exist for adding focus to a fresh entry or attaching media after the fact, but they're escape hatches. The core value is that you don't have to do anything.
+The only command you'll ever need to *remember* is `/journal setup`, once. Manual hooks (`/journal` for focus annotations, `/journal attach` for media when prompted) are escape hatches — the core value is that you don't have to do anything.
 
 ## Install
 
