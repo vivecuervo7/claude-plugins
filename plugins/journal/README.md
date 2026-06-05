@@ -44,8 +44,7 @@ The core value is passive — auto-journaling does the work. The commands below 
 
 | Command | Description |
 |---------|-------------|
-| `/journal` | Manually journal recent work (Haiku, via `journal-append`) |
-| `/journal <focus>` | Journal recent work with the text as focus/annotation |
+| `/journal [focus]` | Manually journal recent work, optionally with text as the focus/annotation (Haiku, via `journal-append`) |
 | `/journal attach <file> [project]` | Attach media to today's entry (Haiku, via `journal-attach`) |
 | `/journal setup` | Configure storage location and enable auto-journaling (one-time) |
 
@@ -73,21 +72,17 @@ Each entry is a standalone markdown file with YAML frontmatter — portable and 
 
 ## Configuration
 
-`~/.claude-journal/config.json` is created automatically on first use:
-
-| Key | Default | Description |
-|-----|---------|-------------|
-| `media_hints_enabled` | true | Add media capture prompts to blog-worthy/demo-worthy entries |
+`~/.claude-journal/config.json` is created automatically on first use. The only setting today is `media_hints_enabled` (default `true`), which controls whether `blog-worthy` and `demo-worthy` entries gain media-capture prompts in their frontmatter. Set it to `false` to suppress those prompts.
 
 ## Tags
 
-Tags are the primary way to find related entries later. Cover three angles when relevant:
+Each entry's tags should cover three angles when relevant:
 
 - **Topic / domain** — what the work is about (e.g., `auth`, `rate-limiting`, `journal-plugin`)
 - **Tech** — language, framework, or tool involved (e.g., `typescript`, `react`, `playwright`)
 - **Kind / signal** — nature or blog/demo potential (e.g., `bugfix`, `refactor`, `architecture`, `exploration`, `blog-worthy`, `demo-worthy`)
 
-Use existing tags when semantically similar — the registry shows what's already in use.
+The tag registry shows what's already in use; the append agent prefers existing tags when semantically similar to keep the namespace from drifting.
 
 ## License
 
