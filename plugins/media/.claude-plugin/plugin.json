@@ -1,0 +1,10 @@
+{
+  "name": "media",
+  "description": "Media utilities for Claude Code — opinionated commands for working with screen recordings, video, and images",
+  "version": "0.1.0",
+  "author": {
+    "name": "Isaac Dedini"
+  },
+  "license": "MIT",
+  "keywords": ["media", "gif", "video", "screencast", "ffmpeg", "productivity"]
+}
