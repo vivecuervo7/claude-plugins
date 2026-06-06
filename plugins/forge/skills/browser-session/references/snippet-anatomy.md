@@ -37,14 +37,14 @@ export async function run(page, args) {
 
 ## `run(page, args)`
 
-- `page` is the Playwright `Page` from the active `wrought` playwright-cli session. The browser is *shared* — don't close it, don't navigate away from work the user has in flight unless that's the whole point of the snippet.
+- `page` is the Playwright `Page` from the active `forge` playwright-cli session. The browser is *shared* — don't close it, don't navigate away from work the user has in flight unless that's the whole point of the snippet.
 - `args` is whatever the caller passed (parsed JSON). The snippet is responsible for its own arg validation today.
 - Throw on unrecoverable errors. The registry catches and records as an `invoke-failed` history event.
 - Return whatever's useful to the caller — a `result` field in the invocation output. Returning `undefined` is fine.
 
 ## ⚠️ run-code constraints
 
-The `run()` body is extracted at invocation time and run inside `playwright-cli -s=wrought run-code "async page => { ... }"`. That sandbox provides `page` and JS built-ins — nothing else.
+The `run()` body is extracted at invocation time and run inside `playwright-cli -s=forge run-code "async page => { ... }"`. That sandbox provides `page` and JS built-ins — nothing else.
 
 - ❌ No `import` statements. They will fail at run-code time.
 - ❌ No `require()`.

@@ -1,6 +1,6 @@
 # Session state machine
 
-`wrought-session.sh` is the single source of truth for "does the `wrought` playwright-cli session exist, and what's it attached to?".
+`forge-session.sh` is the single source of truth for "does the `forge` playwright-cli session exist, and what's it attached to?".
 
 ## States
 
@@ -13,7 +13,7 @@
                          ▼
                   ┌──────────────────┐  yes  ┌──────────────────────────┐
                   │ playwright-cli   ├──────►│  EXISTING                │
-                  │ list grep wrought│       │  reuse the named session │
+                  │ list grep forge│       │  reuse the named session │
                   └──────┬───────────┘       └──────────────────────────┘
                          │ no
                          ▼
@@ -30,7 +30,7 @@
                   ┌──────────────────────┐
                   │  LAUNCHED            │
                   │  open --persistent   │
-                  │  --profile=<wrought  │
+                  │  --profile=<forge  │
                   │  chromium-profile>   │
                   └──────────────────────┘
 ```
@@ -40,14 +40,14 @@
 A single line of JSON to stdout on success:
 
 ```json
-{ "mode": "existing" | "cdp-attached" | "launched", "session": "wrought", "port"?: 9222, "profile"?: "..." }
+{ "mode": "existing" | "cdp-attached" | "launched", "session": "forge", "port"?: 9222, "profile"?: "..." }
 ```
 
 The `mode` field is the signal:
 
-- `"existing"` — a `wrought` session was already in playwright-cli's list. Reuse as-is.
+- `"existing"` — a `forge` session was already in playwright-cli's list. Reuse as-is.
 - `"cdp-attached"` — we attached to a CDP-enabled browser the user launched themselves. **Treat with care:** the session holds real cookies, real auth, real personal context. Side effects propagate to the user's actual browsing.
-- `"launched"` — we launched a managed Chrome with a dedicated `--profile=$WROUGHT_PROFILE`. Profile persists across runs but is isolated from the user's everyday browser.
+- `"launched"` — we launched a managed Chrome with a dedicated `--profile=$FORGE_PROFILE`. Profile persists across runs but is isolated from the user's everyday browser.
 
 ## When to probe vs launch
 
@@ -70,8 +70,8 @@ The `mode` field is the signal:
 
 The whole point of a named playwright-cli session is that *multiple* clients can act on the same browser:
 
-- `wrought-registry.mjs invoke` shells out to `playwright-cli -s=wrought run-code "..."`
-- The `wrought:snippet-author` agent drives via `playwright-cli -s=wrought <action>`
+- `forge-registry.mjs invoke` shells out to `playwright-cli -s=forge run-code "..."`
+- The `forge:snippet-author` agent drives via `playwright-cli -s=forge <action>`
 - The user, if attached to their own Chrome, sees and can click in the same window
 - Future agents and `/spec` workflows use the same session name
 

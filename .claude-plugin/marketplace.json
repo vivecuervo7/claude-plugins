@@ -24,9 +24,9 @@
       "keywords": ["media", "gif", "video", "screencast", "ffmpeg", "productivity"]
     },
     {
-      "name": "wrought",
-      "source": "./plugins/wrought",
-      "description": "Drive your live browser session from Claude — attach over CDP, invoke replayable snippets, author new ones on demand",
+      "name": "forge",
+      "source": "./plugins/forge",
+      "description": "A browser assistant for repeatable user actions — attach to your live session, remember what worked, replay later",
       "version": "0.1.0",
       "license": "MIT",
       "keywords": ["browser", "playwright", "cdp", "automation", "snippets", "productivity"]

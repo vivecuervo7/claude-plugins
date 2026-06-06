@@ -5,7 +5,7 @@ How to turn a successful drive into a `.ts` file that lands in `scratch/`.
 ## File layout
 
 ```ts
-// $WROUGHT_ROOT/scratch/<name>.ts
+// $FORGE_ROOT/scratch/<name>.ts
 export const meta = {
   description: '<one-line summary, present tense, ≤120 chars>',
   preconditions: { /* see Preconditions below */ },
@@ -32,7 +32,7 @@ The `meta` object has **exactly** these keys. Do not invent others.
 
 ## ⚠️ run-code constraints
 
-The `run()` body is extracted at invocation time and run inside `playwright-cli -s=wrought run-code "async page => { ... }"`. That sandbox provides exactly one thing: `page`. Everything else must come from JS built-ins.
+The `run()` body is extracted at invocation time and run inside `playwright-cli -s=forge run-code "async page => { ... }"`. That sandbox provides exactly one thing: `page`. Everything else must come from JS built-ins.
 
 **Therefore:**
 
@@ -173,7 +173,7 @@ export async function run(page, { name, startDate }) {
 Always re-run the registry's reindex so the new snippet appears in `INDEX.md`:
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/scripts/wrought-registry.mjs reindex
+node ${CLAUDE_PLUGIN_ROOT}/scripts/forge-registry.mjs reindex
 ```
 
 The registry parses the first `description: '...'` line in `meta` with a regex, so keep that line single-line and use plain quotes (no template literals, no concatenation).

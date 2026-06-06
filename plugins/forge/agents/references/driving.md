@@ -1,15 +1,15 @@
-# Driving the wrought session
+# Driving the forge session
 
 You drive the browser through the `playwright-cli` skill. **Load it before your first action** — it owns the command vocabulary, and re-stating it here would just go stale. Use the Skill tool with `playwright-cli` as the skill name.
 
-Every action is scoped to the `-s=wrought` session, which the caller has already established (either attached to a real Chrome via CDP or launched as a managed `--persistent` browser). You do *not* need to `open`, `attach`, or `close` — the session is already there.
+Every action is scoped to the `-s=forge` session, which the caller has already established (either attached to a real Chrome via CDP or launched as a managed `--persistent` browser). You do *not* need to `open`, `attach`, or `close` — the session is already there.
 
 ## Always open a fresh tab first
 
 **Before any other driving action**, create a new tab so you don't hijack a pinned, bookmarked, or in-progress tab the user has open:
 
 ```bash
-playwright-cli -s=wrought tab-new about:blank
+playwright-cli -s=forge tab-new about:blank
 ```
 
 `tab-new` focuses the newly-created tab, so subsequent commands (`goto`, `click`, `fill`, `snapshot`, `run-code`) operate on it. This is critical when attached to the user's real browser via CDP: playwright-cli's default page is otherwise an arbitrary existing tab.
@@ -18,9 +18,9 @@ The new tab is visible to the user — they see it open and can watch you drive.
 
 ## The drive-observe-act loop
 
-1. **Observe** — `playwright-cli -s=wrought snapshot` to see the current page. Read the ARIA tree (not the raw DOM) and the element refs (`e1`, `e2`, ...) that come back.
+1. **Observe** — `playwright-cli -s=forge snapshot` to see the current page. Read the ARIA tree (not the raw DOM) and the element refs (`e1`, `e2`, ...) that come back.
 2. **Plan** — based on the snapshot and the goal, decide the next action (one at a time is fine; this is conversation, not batch).
-3. **Act** — `playwright-cli -s=wrought click e3`, `... fill e5 "value"`, etc.
+3. **Act** — `playwright-cli -s=forge click e3`, `... fill e5 "value"`, etc.
 4. **Read what playwright-cli wrote** — every action prints the equivalent Playwright TS code (`await page.getByRole('button', { name: 'Submit' }).click();`). **Collect this code.** It's the raw material for your snippet's `run()` body.
 
 Keep going until the goal is reached. Then snapshot once more to confirm, and move to synthesis.
@@ -30,13 +30,13 @@ Keep going until the goal is reached. Then snapshot once more to confirm, and mo
 playwright-cli outputs Playwright TS code for each interaction. As you go, build up the *successful* sequence:
 
 ```ts
-// from `playwright-cli -s=wrought fill e1 "user@example.com"`
+// from `playwright-cli -s=forge fill e1 "user@example.com"`
 await page.getByRole('textbox', { name: 'Email' }).fill('user@example.com');
 
-// from `playwright-cli -s=wrought fill e2 "..."`
+// from `playwright-cli -s=forge fill e2 "..."`
 await page.getByRole('textbox', { name: 'Password' }).fill('...');
 
-// from `playwright-cli -s=wrought click e3`
+// from `playwright-cli -s=forge click e3`
 await page.getByRole('button', { name: 'Sign In' }).click();
 ```
 
@@ -52,7 +52,7 @@ playwright-cli already generates semantic locators (`getByRole`, `getByText`, `g
 
 ## When you need behaviour playwright-cli doesn't have a verb for
 
-Use `playwright-cli -s=wrought run-code "async page => { ... }"` for one-off Playwright calls that don't have CLI equivalents (waiting on a specific load state, evaluating arbitrary JS, working with frames, etc.). The same constraint applies: the body must be self-contained.
+Use `playwright-cli -s=forge run-code "async page => { ... }"` for one-off Playwright calls that don't have CLI equivalents (waiting on a specific load state, evaluating arbitrary JS, working with frames, etc.). The same constraint applies: the body must be self-contained.
 
 ## When to stop
 
@@ -62,5 +62,5 @@ Use `playwright-cli -s=wrought run-code "async page => { ... }"` for one-off Pla
 
 ## Never
 
-- `playwright-cli -s=wrought close` / `... detach` / `... delete-data` — the session is shared infrastructure. Tearing it down breaks the caller and anything else using it.
-- `playwright-cli -s=wrought goto <fresh-url>` *unless the goal explicitly requires navigation*. If the user was mid-task in a tab, navigating away wipes their work-in-progress. Snapshot first; navigate only when intentional.
+- `playwright-cli -s=forge close` / `... detach` / `... delete-data` — the session is shared infrastructure. Tearing it down breaks the caller and anything else using it.
+- `playwright-cli -s=forge goto <fresh-url>` *unless the goal explicitly requires navigation*. If the user was mid-task in a tab, navigating away wipes their work-in-progress. Snapshot first; navigate only when intentional.

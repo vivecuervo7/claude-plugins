@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# /wrought doctor: read-only checklist of the wrought plugin's install state.
+# /forge doctor: read-only checklist of the forge plugin's install state.
 set -uo pipefail
 
 ok="✓"; fail="✗"; warn="?"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ROOT=$(bash "$SCRIPT_DIR/wrought-root.sh")
+ROOT=$(bash "$SCRIPT_DIR/forge-root.sh")
 
-echo "Wrought plugin doctor"
+echo "Forge plugin doctor"
 echo "====================="
 
 if [ -d "$ROOT" ]; then
@@ -33,10 +33,10 @@ else
 fi
 
 if command -v playwright-cli >/dev/null 2>&1 && \
-   playwright-cli list 2>/dev/null | grep -qE '\bwrought\b'; then
-  echo "$ok 'wrought' playwright-cli session is active"
+   playwright-cli list 2>/dev/null | grep -qE '\bforge\b'; then
+  echo "$ok 'forge' playwright-cli session is active"
 else
-  echo "  'wrought' session not active (will be established on first use via wrought-session.sh)"
+  echo "  'forge' session not active (will be established on first use via forge-session.sh)"
 fi
 
 if curl -sf -m 1 http://localhost:9222/json/version >/dev/null 2>&1; then
