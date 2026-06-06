@@ -2,3 +2,7 @@
 
 # Eval workspace output (generated during eval runs)
 **/journal-workspace/
+
+# Ad-hoc notes / bug reports / scratch files
+tmp/
+.playwright-cli/
