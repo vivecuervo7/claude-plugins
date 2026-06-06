@@ -17,7 +17,7 @@ Your prompt is a self-contained work summary composed by the calling agent (eith
 
 ## How to run
 
-1. **Bootstrap context** — emits `DATE`, `TIME`, `PROJECT`, `PROJECT_PATH`, `GIT_REPO`, `JOURNAL_ROOT`, `CONFIG` as `KEY=VALUE` lines. Use these values throughout; never use your internal clock for the date.
+1. **Bootstrap context** — emits `DATE`, `TIME`, `PROJECT`, `PROJECT_PATH`, `GIT_REPO`, `JOURNAL_ROOT` as `KEY=VALUE` lines. Use these values throughout; never use your internal clock for the date.
    ```bash
    bash ${CLAUDE_PLUGIN_ROOT}/scripts/journal-bootstrap.sh
    ```

@@ -1,5 +1,7 @@
 # Attach Mode
 
+**Loading**: Loaded by the `journal-attach` agent.
+
 Attach a media file (screenshot, screencast, diagram) to a journal entry.
 
 Prompt format: `<file>` or `<file> <project>`. The file path may be absolute, relative, or `~`-prefixed, and **commonly contains spaces** (e.g. macOS screenshots default to `~/Desktop/Screenshot 2026-06-06 at 12.24.50 am.jpg`). Always wrap source paths in double quotes when passing to bash — both in the existence check and in the `journal-attach.sh` call. Do not glob or expand the path; use it verbatim.

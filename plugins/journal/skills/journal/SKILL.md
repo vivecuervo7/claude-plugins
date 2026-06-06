@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Bash(bash **/journal/*/scripts/*)
 
 # Journal
 
-The user-facing `/journal` entry point. Parse only the **first whitespace-separated token** of `$ARGUMENTS` and route:
+The user-facing `/journal` entry point. Parse the **first whitespace-separated token** of `$ARGUMENTS`, lowercase it, and route:
 
 - **First token is `attach`**: call the `journal:journal-attach` agent via the Agent tool. Pass everything after `attach` as the prompt (a file path, optionally followed by a project name). If nothing follows `attach`, tell the user the command needs at least a file path and do not invoke the agent.
 
@@ -16,7 +16,7 @@ The user-facing `/journal` entry point. Parse only the **first whitespace-separa
 
 - **First token is `doctor`**: run `bash ${CLAUDE_PLUGIN_ROOT}/scripts/journal-doctor.sh` and relay its checklist output verbatim. Read-only diagnostic that confirms pointer file, journal root, config, auto-journal install, and global CLAUDE.md import are all wired up. Add no commentary unless a check fails, in which case quote the remedy line beside the failure.
 
-- **Anything else (free text, or empty)**: the Haiku agent can't see this conversation — only the prompt you pass. **You** must read the conversation and compose a summary of the work worth journaling. That's your only job here; do not run scripts, glob filesystems, or read existing entries (the agent does its own bootstrap and dedups against today's entries before writing).
+- **Anything else (free text, or empty)**: empty args is a first-class route (manual journal of recent work), not an ambiguity, so there is no AskUserQuestion fallback. The Haiku agent can't see this conversation — only the prompt you pass. **You** must read the conversation and compose a summary of the work worth journaling. That's your only job here; do not run scripts, glob filesystems, or read existing entries (the agent does its own bootstrap and dedups against today's entries before writing).
 
   - Compose a self-contained prose summary covering decisions, non-obvious solutions, architectural choices, and learnings. Don't hand the agent a one-liner — give it enough substance that it can write a useful entry without seeing the conversation.
   - If `$ARGUMENTS` is non-empty, treat it as focus/annotation — let it shape what you emphasise.

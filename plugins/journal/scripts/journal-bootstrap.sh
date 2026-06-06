@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Bootstrap: emits all context the append/attach playbooks need.
-# Output is KEY=VALUE lines. CONFIG is a single-line JSON value.
+# Output is KEY=VALUE lines.
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -26,11 +26,3 @@ printf 'PROJECT=%s\n' "$project"
 # Journal root (delegates to shared helper)
 ROOT=$(bash "$SCRIPT_DIR/journal-root.sh")
 printf 'JOURNAL_ROOT=%s\n' "$ROOT"
-
-# Ensure config exists, then emit it as one line
-CONFIG="$ROOT/config.json"
-if [ ! -f "$CONFIG" ]; then
-  mkdir -p "$ROOT"
-  printf '{\n  "media_hints_enabled": true\n}\n' > "$CONFIG"
-fi
-printf 'CONFIG=%s\n' "$(tr -d '\n' < "$CONFIG")"

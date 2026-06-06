@@ -1,5 +1,7 @@
 # Append Mode
 
+**Loading**: Loaded by the `journal-append` agent.
+
 Create a new journal entry for the work described in your prompt.
 
 ## Step 0: Dedup Against Today's Entries
@@ -32,7 +34,7 @@ project: <project-name>
 path: <project-path>
 git_repo: true|false
 tags: [<relevant-tags>]
-# Only when blog-worthy/demo-worthy AND media_hints_enabled in CONFIG:
+# Only when blog-worthy/demo-worthy:
 media_hints:
   - type: <screenshot|screencast|diagram>
     description: "<what to capture>"
@@ -59,7 +61,7 @@ Only mark `blog-worthy` or `demo-worthy` when the work is genuinely novel or int
 
 ### Media hints
 
-Include only if `media_hints_enabled` is true in `CONFIG` **and** the entry carries `blog-worthy`/`demo-worthy`. When present, also add a body checklist:
+Include only when the entry carries `blog-worthy` or `demo-worthy`. When present, also add a body checklist:
 
 ```markdown
 ### Media Needed

@@ -24,12 +24,6 @@ else
   echo "$warn Journal root doesn't exist at $ROOT — will be auto-created on next journal"
 fi
 
-if [ -f "$ROOT/config.json" ]; then
-  echo "$ok Journal config present ($ROOT/config.json)"
-else
-  echo "$warn Journal config not yet created — will be auto-created on next journal"
-fi
-
 INSTALL="$HOME/.claude/.vive-claude/journal/CLAUDE.md"
 if [ ! -f "$INSTALL" ]; then
   echo "$fail Auto-journal not installed at $INSTALL"

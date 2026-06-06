@@ -1,6 +1,8 @@
 # Setup Mode
 
-Loaded by `/journal setup`. Edits the user's CLAUDE.md and may ask one-time storage questions — both parent-session concerns. Typically run once per machine.
+**Loading**: Loaded by `/journal setup`.
+
+Edits the user's CLAUDE.md and may ask one-time storage questions — both parent-session concerns. Typically run once per machine.
 
 ## Constants
 
@@ -22,8 +24,7 @@ POINTER_PATH  = ~/.claude/journal-config.json
 
 3. **Install auto-journal instructions.** Confirm once, defaulting to yes — auto-journaling is the plugin's main behaviour, and `/journal` is just the manual escape hatch. If continuing:
    1. Read `TEMPLATE_PATH` and write to `INSTALL_PATH` (overwrite if it exists, so re-running picks up plugin updates).
-   2. Pick the target CLAUDE.md: project-level if you're in a git repo with one, otherwise `~/.claude/CLAUDE.md`.
-   3. Append `IMPORT_LINE` to it (skip if already present).
+   2. Append `IMPORT_LINE` to `~/.claude/CLAUDE.md` (skip if already present). Auto-journaling is a machine-wide behaviour — do not install into a project-level CLAUDE.md, even when one exists.
 
 4. **Confirm:**
    ```
@@ -31,8 +32,6 @@ POINTER_PATH  = ~/.claude/journal-config.json
    Auto-journaling enabled → ~/.claude/.vive-claude/journal/CLAUDE.md
    ```
    (Omit the second line if auto-journaling was declined.)
-
-The journal root's `config.json` is created lazily by the append agent's bootstrap — nothing to do here.
 
 ## Re-running
 
