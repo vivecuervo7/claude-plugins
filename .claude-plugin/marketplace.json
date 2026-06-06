@@ -22,6 +22,14 @@
       "version": "0.1.1",
       "license": "MIT",
       "keywords": ["media", "gif", "video", "screencast", "ffmpeg", "productivity"]
+    },
+    {
+      "name": "wrought",
+      "source": "./plugins/wrought",
+      "description": "Drive your live browser session from Claude — attach over CDP, invoke replayable snippets, author new ones on demand",
+      "version": "0.1.0",
+      "license": "MIT",
+      "keywords": ["browser", "playwright", "cdp", "automation", "snippets", "productivity"]
     }
   ]
 }

@@ -15,6 +15,7 @@ Then install individual plugins:
 ```bash
 claude plugin install journal@vive-claude
 claude plugin install media@vive-claude
+claude plugin install wrought@vive-claude
 ```
 
 ## Plugins
@@ -23,6 +24,7 @@ claude plugin install media@vive-claude
 |--------|-------------|
 | [journal](plugins/journal/) | Automatic developer journaling — captures decisions, architecture, and learnings as you work |
 | [media](plugins/media/) | Media utilities — opinionated commands for working with screen recordings and video |
+| [wrought](plugins/wrought/) | Drive your live browser session from Claude — attach over CDP, invoke replayable snippets |
 
 ## License
 
