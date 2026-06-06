@@ -1,6 +1,6 @@
 # media
 
-Media utilities for Claude Code. Each command bundles a recurring screen-recording, video, or image chore into a single slash command with sensible defaults and a friendly input layer — natural-language file hints, preflight checks, and helpful failure modes — so these tasks stop being a trip to the man page.
+Media utilities for Claude Code. Each command bundles a recurring screen-recording or video chore into a single slash command with sensible defaults and a friendly input layer — natural-language file hints, preflight checks, and helpful failure modes — so these tasks stop being a trip to the man page.
 
 Today the plugin ships one command (`/gif`). It will grow as more recurring recipes earn their keep.
 
@@ -13,13 +13,15 @@ claude plugin install media@vive-claude
 
 ## Requirements
 
+This plugin is macOS-only. Commands rely on `Screen Recording` filename conventions, Desktop/Downloads/Movies search paths, and Homebrew for installing dependencies.
+
 Individual commands may depend on external tools. Each command checks its own dependencies before doing any work and stops with install hints if anything is missing.
 
 `/gif` requires `ffmpeg`:
 
-- **macOS**: `brew install ffmpeg`
-- **Debian/Ubuntu**: `sudo apt install ffmpeg`
-- **Windows**: `winget install ffmpeg` (or `choco install ffmpeg`)
+```bash
+brew install ffmpeg
+```
 
 ## Commands
 

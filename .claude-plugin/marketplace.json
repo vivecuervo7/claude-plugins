@@ -18,8 +18,8 @@
     {
       "name": "media",
       "source": "./plugins/media",
-      "description": "Media utilities — opinionated commands for working with screen recordings, video, and images",
-      "version": "0.1.0",
+      "description": "Media utilities — opinionated commands for working with screen recordings and video",
+      "version": "0.1.1",
       "license": "MIT",
       "keywords": ["media", "gif", "video", "screencast", "ffmpeg", "productivity"]
     }

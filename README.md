@@ -22,7 +22,7 @@ claude plugin install media@vive-claude
 | Plugin | Description |
 |--------|-------------|
 | [journal](plugins/journal/) | Automatic developer journaling — captures decisions, architecture, and learnings as you work |
-| [media](plugins/media/) | Media utilities — opinionated commands for working with screen recordings, video, and images (starts with `/gif`) |
+| [media](plugins/media/) | Media utilities — opinionated commands for working with screen recordings and video |
 
 ## License
 
