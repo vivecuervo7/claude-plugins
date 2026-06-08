@@ -1,6 +1,7 @@
 ---
-description: Trim static/loading segments out of a video or gif using auto-editor
-argument-hint: [file path | hint like "last recording" or "last gif" | empty for newest] [--threshold N%]
+name: trim
+description: "Trim static/loading segments out of a video or gif using auto-editor motion detection. Triggers on `/trim ...` slash invocations and natural phrases like 'cut the dead air from this recording', 'trim the loading spinners', 'shrink this gif'."
+argument-hint: "[file path | hint like 'last recording' or 'last gif' | empty for newest] [--threshold N%]"
 allowed-tools: Bash, Glob
 ---
 

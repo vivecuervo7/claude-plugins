@@ -1,6 +1,7 @@
 ---
-description: Hold the last frame of a video or gif for a few seconds before it loops or ends
-argument-hint: [file path | hint like "last gif" | empty for newest] [--hold N]
+name: pad
+description: "Hold the last frame of a video or gif for a few seconds before it loops or ends. Triggers on `/pad ...` slash invocations and natural phrases like 'make the last frame linger', 'pad the end of this gif', 'hold the final frame'."
+argument-hint: "[file path | hint like 'last gif' | empty for newest] [--hold N]"
 allowed-tools: Bash, Glob
 ---
 

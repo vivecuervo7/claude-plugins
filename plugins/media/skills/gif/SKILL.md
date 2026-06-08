@@ -1,6 +1,7 @@
 ---
-description: Convert a recording to a PR-suitable GIF — trims dead air, encodes, holds the last frame
-argument-hint: [file path | hint like "last screen recording" | empty for newest video] [--no-trim] [--no-pad] [--threshold N%] [--hold N]
+name: gif
+description: "Convert a recording to a PR-suitable GIF — trims dead air, encodes at 12fps/lanczos/≤800px, holds the last frame. Triggers on `/gif ...` slash invocations and natural phrases like 'make a gif of the recording', 'convert this video to a gif', 'gif the last screen recording'."
+argument-hint: "[file path | hint like 'last screen recording' | empty for newest video] [--no-trim] [--no-pad] [--threshold N%] [--hold N]"
 allowed-tools: Bash, Glob
 ---
 
