@@ -24,7 +24,7 @@ claude plugin install forge@vive-claude
 |--------|-------------|
 | [journal](plugins/journal/) | Automatic developer journaling — captures decisions, architecture, and learnings as you work |
 | [media](plugins/media/) | Media utilities — opinionated commands for working with screen recordings and video |
-| [forge](plugins/forge/) | A browser assistant for repeatable user actions — attach to your live session, remember what worked, replay later |
+| [forge](plugins/forge/) | A browser assistant for repeatable user actions — drives a per-session managed Chrome, remembers what worked, replays cheaply next time |
 
 ## License
 
