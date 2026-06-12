@@ -2,6 +2,21 @@
 
 Several patterns govern how the agent should use a cone.
 
+## 0. Two modes, one tool
+
+The kernel offers two materialisation modes. Picking the right one for the task shape is the first lever.
+
+| Mode | Granularity | Best for |
+|---|---|---|
+| **dir-mode** (`--dirs`, default) | Whole directories + auto-included root files of every intermediate parent | Exploratory work — substantial features, refactors of unknown scope, anything where the agent needs to discover files |
+| **file-mode** (`--files`) | Exactly the files matching the patterns | Targeted work — renames with known call sites, single-file edits, peek-required JSDoc with known cross-references |
+
+**File-mode wins when the file list is knowable upfront.** A typo fix needs one file. A rename's call sites surface via `git grep -l <symbol> HEAD` before the cone is spawned. A "JSDoc this function and link to that type" task names both files in the prompt. Materialising exactly those files keeps the cone small and the agent's exploration tightly scoped.
+
+**Dir-mode wins when discovery is part of the task.** A substantial feature requires reading precedents, sibling configs, the surrounding subsystem. Pre-enumerating every file would force the agent into a `git show HEAD:` peek dance for every discovery — five peeks cost more tokens than one wider initial cone. Materialise the region; let the agent navigate inside it.
+
+**Cost model.** File-mode pays an upfront cost (enumeration) and saves on the working set. Dir-mode pays a wider working set and saves on per-discovery overhead. The crossover is shape, not size: how knowable is the file list at the moment you spawn the cone?
+
 ## 1. Discovery uses cone-aware tools
 
 Different search tools see different things from inside a cone — choosing the right one is the biggest lever the cone gives you. Default to cone-aware search; reach for full-index search consciously.
@@ -30,15 +45,16 @@ git show main:config/database.yml
 git ls-tree --name-only HEAD src/utils/
 ```
 
-Expand the cone only when:
+Reach for `expand` when:
 
 - You're about to make an edit
+- You created a new file in a file-mode cone (it must be added to the cone before `git add` will track it — see §3.5)
 - You need `rg` / `find` / cone-aware `git grep` to walk across a directory's contents
 - The file needs to exist on disk for a tool you're running
 
-## 3. Propose directories
+## 3. Propose directories (dir-mode)
 
-Cone mode is directory-granular. Including `src/auth/login.ts` means including the rest of `src/auth/` along with it — the directory is the unit. When sizing an initial cone, think in directories from the start.
+Dir-mode is directory-granular. Including `src/auth/login.ts` means including the rest of `src/auth/` along with it — the directory is the unit. When sizing an initial dir-mode cone, think in directories from the start.
 
 For a task that touches:
 
@@ -48,7 +64,7 @@ For a task that touches:
 
 The cone is `src/auth/ src/users/`.
 
-**Cone mode also auto-includes root-level files of every parent directory along the path.** When you add `apps/web/components/` to your cone, materialisation includes:
+**Dir-mode also auto-includes root-level files of every parent directory along the path.** When you add `apps/web/components/` to your cone, materialisation includes:
 
 - `apps/web/components/` and everything below it (the cone target)
 - Root-level files of `apps/web/` (configs, manifests, indices at that level)
@@ -57,16 +73,38 @@ The cone is `src/auth/ src/users/`.
 
 So when a top-level file at an intermediate parent is what you need (a workspace-shared utility, a config, a test helper), coning the nested subdirectory you actually edit is enough — the intermediate parent's loose files come along for free, without materialising the parent's other subdirectories.
 
-If a task seems to touch root-level files only (e.g. `index.html`, `about.html`, `package.json`), the cone is **empty** — root files are auto-included by cone mode. `cone new <branch>` with no paths gives you exactly that minimum.
+If a task seems to touch root-level files only (e.g. `index.html`, `about.html`, `package.json`), the cone is **empty** — root files are auto-included by dir-mode. `cone new <branch>` with no paths gives you exactly that minimum.
+
+## 3.5. Propose file patterns (file-mode)
+
+File-mode is file-granular. Patterns are gitignore-style with leading `/` to anchor at the repo root (the kernel adds the slash if missing).
+
+For a rename whose call sites are:
+
+- `packages/lib/src/utils.ts` (definition)
+- `packages/lib/src/runner.ts` (caller)
+- `apps/web/src/feature.ts` (caller)
+- `apps/web/__tests__/feature.spec.ts` (test)
+
+The file-mode cone is `/packages/lib/src/utils.ts /packages/lib/src/runner.ts /apps/web/src/feature.ts /apps/web/__tests__/feature.spec.ts`.
+
+**File-mode does NOT auto-include root files.** If the task needs `CLAUDE.md`, `package.json`, or repo-root configs, either:
+
+- `git show HEAD:CLAUDE.md` (peek) — free, no working-set growth
+- include the root file in the initial pattern list
+
+**New files in file-mode need to be added to the cone before staging.** Sparse-checkout treats files outside the patterns as "ignored, do not track" — so `git add path/to/new-file.ts` won't see the file. Run `cone expand /path/to/new-file.ts` (or `git sparse-checkout add /path/to/new-file.ts`) first, then stage normally. The kernel's `expand` route auto-detects file-mode and routes the argument as a pattern.
 
 ## 4. Initial cone heuristics
 
 When the user describes a task without giving you paths:
 
+- **Pick the mode first.** Is the file list knowable now? File-mode. Will the agent discover files? Dir-mode. (See §0.)
 - **Start small.** A too-narrow cone costs one `expand` to fix. A too-broad cone gives up most of the benefit of using a cone in the first place.
 - **Inspect the tree via git metadata.** `git ls-tree -r --name-only HEAD | grep …` and `git log --name-only --all | sort -u | grep …` give you the tree's shape without traversing the filesystem.
+- **For file-mode rename surfaces, use full-index search up front.** `git grep -l <symbol> HEAD` enumerates every file containing the symbol, which becomes the cone's file list directly. Pay the one-time breadth cost to get a tight working set.
 - **Look at where similar work happened.** `git log --name-only --pretty=format: --all -- '*<keyword>*' | sort -u` shows you which directories historically touch a topic. That's usually a better cone seed than a fresh guess.
-- **Confirm when ambiguous.** "Spinning up at `src/auth/` and `src/users/` — does that cover what you have in mind?" beats spawning twice.
+- **Confirm when ambiguous.** "Going file-mode with `packages/lib/utils.ts` + the 4 caller files — does that match?" beats spawning twice.
 
 ## 5. Parallelising across cones
 

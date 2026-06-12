@@ -10,23 +10,40 @@ usage() {
 cone.sh — minimal git worktrees with sparse-checkout cones for editing.
 
 USAGE
-  cone.sh new [--force] <branch> [paths...]
-      Create a cone on <branch>.
+  cone.sh new [--force] [--files|--dirs] <branch> [paths...]
+      Create a cone on <branch>. Two modes:
+
+      --dirs (default) — cone-mode sparse-checkout.
         - Branch new + no paths     → root files only
         - Branch new + paths        → cone = those directories
         - Branch exists + no paths  → cone derived from
                                       `git diff <base>...<branch>`
                                       (base = main/master/origin/HEAD)
         - Branch exists + paths     → cone = those directories
+        Root files are auto-included. Good for exploratory work where
+        the agent will discover what to read as it goes.
+
+      --files — no-cone sparse-checkout with explicit file patterns.
+        Patterns are gitignore-style; leading `/` is added if missing
+        (anchors at repo root). Root files are NOT auto-included — pass
+        them explicitly if needed.
+        - Branch new + no patterns       → error (file-mode needs patterns)
+        - Branch new + patterns          → cone = those file patterns
+        - Branch exists + no patterns    → file list derived from diff
+        - Branch exists + patterns       → cone = those file patterns
+        Good for targeted work where the files are known upfront
+        (renames, surgical edits, peek-required tasks).
+
       Refuses to spawn inside a Claude plugin repo (catches a common
       wrong-cwd footgun) unless --force is passed.
 
   cone.sh expand <paths...>
-      Add directories to the current cone. Idempotent.
-      Run from inside a cone.
+      Add to the current cone. Idempotent. In cone-mode worktrees pass
+      directories; in file-mode worktrees pass file patterns (leading
+      `/` is added if missing). Run from inside a cone.
 
   cone.sh list
-      List existing worktrees with their cones.
+      List existing worktrees with their cones and mode.
 
   cone.sh remove <name-or-path> [--force]
       Tear down a cone. Refuses on uncommitted changes unless --force.
@@ -36,9 +53,9 @@ USAGE
 
 NOTES
   Cones are created as siblings of the primary checkout, named
-  <repo>-<sanitised-branch>. Cone mode is used; root files are
-  auto-included. The cone holds the directories the agent will edit;
-  verification (builds, tests, linters) runs from your primary checkout.
+  <repo>-<sanitised-branch>. The cone holds the files/directories the
+  agent will edit; verification (builds, tests, linters) runs from your
+  primary checkout.
 EOF
 }
 
@@ -125,29 +142,50 @@ normalize_paths_stdin() {
   done | sort -u | awk 'NF'
 }
 
+# File-mode pattern normalization: ensure each pattern has a leading `/` so it
+# anchors at the repo root. Without anchoring, `foo.ts` would match any file
+# named `foo.ts` anywhere in the tree — almost never what the caller meant.
+normalize_file_patterns() {
+  local p
+  for p in "$@"; do
+    [[ -z "$p" ]] && continue
+    case "$p" in
+      /*) printf '%s\n' "$p" ;;
+      *)  printf '/%s\n' "$p" ;;
+    esac
+  done | sort -u | awk 'NF'
+}
+
 print_summary() {
-  # print_summary <dir> <branch> [<cone>...]
-  local dir=$1 branch=$2
-  shift 2
+  # print_summary <dir> <branch> <mode> [<entry>...]
+  local dir=$1 branch=$2 mode=$3
+  shift 3
   echo "worktree: $dir"
   echo "branch:   $branch"
+  echo "mode:     $mode"
   if (( $# > 0 )); then
     echo "cone:"
     printf '  %s\n' "$@"
   else
-    echo "cone:     (root files only)"
+    if [[ "$mode" == "files" ]]; then
+      echo "cone:     (empty — file-mode with no patterns)"
+    else
+      echo "cone:     (root files only)"
+    fi
   fi
 }
 
 # ---------- subcommands ----------
 
 cmd_new() {
-  # Pre-parse: --force at any position skips the plugin-repo guard.
-  local force=0
+  # Pre-parse: --force, --files, --dirs are positional-agnostic flags.
+  local force=0 mode=dirs
   local -a args=()
   while (( $# > 0 )); do
     case "$1" in
       --force) force=1 ;;
+      --files) mode=files ;;
+      --dirs)  mode=dirs ;;
       *) args+=("$1") ;;
     esac
     shift
@@ -174,26 +212,47 @@ cmd_new() {
     start_ref="origin/$branch"
   fi
 
-  # Compute the cone.
-  #   Explicit paths given     → use them (override).
-  #   No paths, branch exists  → derive from `git diff <base>...<branch>`.
-  #   No paths, branch is new  → empty cone (root files only).
-  local -a cone=()
+  # Compute the include list.
+  #   Explicit paths given       → use them (override).
+  #   No paths, branch exists    → derive from `git diff <base>...<branch>`.
+  #   No paths, branch is new    → empty (cone-mode → root only;
+  #                                 file-mode → error, ask for patterns).
+  local -a includes=()
   if (( $# > 0 )); then
-    while IFS= read -r d; do
-      [[ -n "$d" ]] && cone+=("$d")
-    done < <(printf '%s\n' "$@" | normalize_paths_stdin)
+    if [[ "$mode" == files ]]; then
+      while IFS= read -r p; do
+        [[ -n "$p" ]] && includes+=("$p")
+      done < <(normalize_file_patterns "$@")
+    else
+      while IFS= read -r d; do
+        [[ -n "$d" ]] && includes+=("$d")
+      done < <(printf '%s\n' "$@" | normalize_paths_stdin)
+    fi
   elif (( branch_exists == 1 )); then
     local base
     base=$(default_base_branch)
     if git rev-parse --verify --quiet "$base" >/dev/null; then
-      while IFS= read -r d; do
-        [[ -n "$d" ]] && cone+=("$d")
-      done < <(git diff --name-only "$base"..."$start_ref" | normalize_paths_stdin)
-      if (( ${#cone[@]} == 0 )); then
-        note "diff ${base}...${branch} touches only root files; cone will be root-only"
+      if [[ "$mode" == files ]]; then
+        local -a diff_files=()
+        while IFS= read -r f; do
+          [[ -n "$f" ]] && diff_files+=("$f")
+        done < <(git diff --name-only "$base"..."$start_ref")
+        if (( ${#diff_files[@]} > 0 )); then
+          while IFS= read -r p; do
+            [[ -n "$p" ]] && includes+=("$p")
+          done < <(normalize_file_patterns "${diff_files[@]}")
+        fi
+      else
+        while IFS= read -r d; do
+          [[ -n "$d" ]] && includes+=("$d")
+        done < <(git diff --name-only "$base"..."$start_ref" | normalize_paths_stdin)
+      fi
+      if (( ${#includes[@]} == 0 )); then
+        note "diff ${base}...${branch} produced no entries; cone will be empty"
       fi
     fi
+  elif [[ "$mode" == files ]]; then
+    die "file-mode on a new branch needs at least one pattern (e.g. /path/to/file.ts)"
   fi
 
   # Create the worktree.
@@ -209,14 +268,18 @@ cmd_new() {
 
   (
     cd "$dir"
-    git sparse-checkout init --cone
-    if (( ${#cone[@]} > 0 )); then
-      git sparse-checkout set "${cone[@]}"
+    if [[ "$mode" == files ]]; then
+      git sparse-checkout init --no-cone
+    else
+      git sparse-checkout init --cone
+    fi
+    if (( ${#includes[@]} > 0 )); then
+      git sparse-checkout set "${includes[@]}"
     fi
     git checkout >/dev/null
   )
 
-  print_summary "$dir" "$branch" "${cone[@]}"
+  print_summary "$dir" "$branch" "$mode" "${includes[@]}"
 }
 
 cmd_expand() {
@@ -225,7 +288,20 @@ cmd_expand() {
   git sparse-checkout list >/dev/null 2>&1 \
     || die "current directory is not a cone (run 'cone new' first)"
 
-  git sparse-checkout add "$@"
+  # Detect cone vs no-cone mode from the worktree's git config and route the
+  # incoming arguments accordingly: directories for cone-mode, anchored
+  # gitignore patterns for file-mode.
+  local cone_mode
+  cone_mode=$(git config --get core.sparseCheckoutCone 2>/dev/null || echo "false")
+  if [[ "$cone_mode" == "true" ]]; then
+    git sparse-checkout add "$@"
+  else
+    local -a patterns=()
+    while IFS= read -r p; do
+      [[ -n "$p" ]] && patterns+=("$p")
+    done < <(normalize_file_patterns "$@")
+    git sparse-checkout add "${patterns[@]}"
+  fi
   note "expanded: $*"
   echo
   echo "current cone:"
@@ -234,18 +310,23 @@ cmd_expand() {
 
 cmd_list() {
   require_in_repo
-  local wt br gitdir listing
+  local wt br gitdir listing cone_mode mode_label
   while IFS= read -r wt; do
     [[ -z "$wt" ]] && continue
     br=$(git -C "$wt" symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
     gitdir=$(git -C "$wt" rev-parse --git-dir 2>/dev/null || true)
     echo "$wt  [$br]"
-    # A worktree has a sparse-checkout if its gitdir/info/sparse-checkout exists.
-    # `git sparse-checkout list` then gives us the clean user-facing dir list.
     if [[ -n "$gitdir" && -f "$gitdir/info/sparse-checkout" ]]; then
+      cone_mode=$(git -C "$wt" config --get core.sparseCheckoutCone 2>/dev/null || echo "false")
+      if [[ "$cone_mode" == "true" ]]; then mode_label="dirs"; else mode_label="files"; fi
+      echo "  mode: $mode_label"
       listing=$(git -C "$wt" sparse-checkout list 2>/dev/null || true)
       if [[ -z "$listing" ]]; then
-        echo "  (root files only)"
+        if [[ "$mode_label" == "files" ]]; then
+          echo "  (empty — file-mode with no patterns)"
+        else
+          echo "  (root files only)"
+        fi
       else
         echo "$listing" | sed 's/^/  /'
       fi

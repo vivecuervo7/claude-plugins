@@ -1,7 +1,7 @@
 {
   "name": "cone",
   "description": "Spin up cones — minimal git worktrees with sparse-checkout for Claude to edit in. Diff-derived starting cones, on-demand expansion, easy teardown. Designed for parallelising small edits across a large repo.",
-  "version": "0.1.1",
+  "version": "0.2.0-dev",
   "author": {
     "name": "Isaac Dedini"
   },
