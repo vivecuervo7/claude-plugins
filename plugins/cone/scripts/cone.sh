@@ -10,7 +10,7 @@ usage() {
 cone.sh — minimal git worktrees with sparse-checkout cones for editing.
 
 USAGE
-  cone.sh new <branch> [paths...]
+  cone.sh new [--force] <branch> [paths...]
       Create a cone on <branch>.
         - Branch new + no paths     → root files only
         - Branch new + paths        → cone = those directories
@@ -18,6 +18,8 @@ USAGE
                                       `git diff <base>...<branch>`
                                       (base = main/master/origin/HEAD)
         - Branch exists + paths     → cone = those directories
+      Refuses to spawn inside a Claude plugin repo (catches a common
+      wrong-cwd footgun) unless --force is passed.
 
   cone.sh expand <paths...>
       Add directories to the current cone. Idempotent.
@@ -46,6 +48,22 @@ note() { echo "cone: $*" >&2; }
 require_in_repo() {
   git rev-parse --git-dir >/dev/null 2>&1 \
     || die "not inside a git repository"
+}
+
+# Refuse to spawn a worktree if the current git repo looks like a Claude plugin
+# development repo (has a top-level .claude-plugin/ directory). This catches a
+# common footgun where an agent invokes cone from the orchestrator's cwd (a
+# plugin repo) instead of the intended target repo. Override with --force.
+guard_against_plugin_repo() {
+  local toplevel
+  toplevel=$(git rev-parse --show-toplevel 2>/dev/null) || return 0
+  if [[ -d "$toplevel/.claude-plugin" ]]; then
+    die "refusing to spawn a worktree in a Claude plugin repo
+       ($toplevel)
+   This is usually a wrong-cwd error — you probably meant to invoke
+   cone from inside your target repo. cd into the target and try again.
+   To override, pass --force."
+  fi
 }
 
 primary_root() {
@@ -124,10 +142,23 @@ print_summary() {
 # ---------- subcommands ----------
 
 cmd_new() {
+  # Pre-parse: --force at any position skips the plugin-repo guard.
+  local force=0
+  local -a args=()
+  while (( $# > 0 )); do
+    case "$1" in
+      --force) force=1 ;;
+      *) args+=("$1") ;;
+    esac
+    shift
+  done
+  set -- "${args[@]+"${args[@]}"}"
+
   local branch=${1:-}
   shift || true
   [[ -n "$branch" ]] || die "missing branch name"
   require_in_repo
+  (( force == 1 )) || guard_against_plugin_repo
 
   local dir
   dir=$(worktree_dir_for "$branch")
