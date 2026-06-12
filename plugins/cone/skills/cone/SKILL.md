@@ -15,6 +15,8 @@ The `/cone` entry point. Parse the first whitespace-separated token of `$ARGUMEN
 
 A cone is for editing — Claude reads files, makes changes, commits. The kernel materialises only the directories you ask for, so the agent's working set stays bounded to the change at hand.
 
+**Inside a cone, default to cone-aware search tools.** `rg <pattern>`, `find`, and plain `git grep <pattern>` walk only the materialised cone — their result bodies are bounded to your actual working set. Reach for `git grep <pattern> HEAD` (full-index search) consciously, for the specific case where you need a definitive repo-wide answer (sizing an expand, verifying global completeness before a rename). The point of the cone is that you don't need to look at the rest of the repo most of the time; the search tool should reflect that.
+
 Verification — running tests, linting, building, type-checking — happens in the primary checkout. If the user wants to verify a change runs correctly, point them there:
 
 > Run that in your primary checkout. From this cone: `cd $(git worktree list --porcelain | awk '/^worktree/ { print $2; exit }')`.
@@ -85,7 +87,7 @@ When the user says "spin up a cone for the auth refactor" (or similar), follow t
 3. **Confirm with the user** when ambiguous. In Auto Mode, proceed with the most reasonable proposal and report what you chose.
 4. **Run `cone new <branch> <dirs...>`** with the proposed paths.
 
-See `references/discipline.md` for the longer discussion (initial cone heuristics, parallelisation patterns, peek-before-expand).
+See `references/discipline.md` for the longer discussion (cone-aware search tools, peek-before-expand, intermediate-parent auto-include, initial cone heuristics, parallelisation patterns).
 
 ## Hard rules
 
