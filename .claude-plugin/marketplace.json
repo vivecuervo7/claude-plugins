@@ -22,14 +22,6 @@
       "version": "0.1.1",
       "license": "MIT",
       "keywords": ["media", "gif", "video", "screencast", "ffmpeg", "productivity"]
-    },
-    {
-      "name": "forge",
-      "source": "./plugins/forge",
-      "description": "A browser assistant for repeatable user actions — attach to your live session, remember what worked, replay later",
-      "version": "0.1.0",
-      "license": "MIT",
-      "keywords": ["browser", "playwright", "cdp", "automation", "snippets", "productivity"]
     }
   ]
 }

@@ -15,7 +15,6 @@ Then install individual plugins:
 ```bash
 claude plugin install journal@vive-claude
 claude plugin install media@vive-claude
-claude plugin install forge@vive-claude
 ```
 
 ## Plugins
@@ -24,7 +23,10 @@ claude plugin install forge@vive-claude
 |--------|-------------|
 | [journal](plugins/journal/) | Automatic developer journaling — captures decisions, architecture, and learnings as you work |
 | [media](plugins/media/) | Media utilities — opinionated commands for working with screen recordings and video |
-| [forge](plugins/forge/) | A browser assistant for repeatable user actions — drives a per-session managed Chrome, remembers what worked, replays cheaply next time |
+
+## Related
+
+- [**forge**](https://github.com/vivecuervo7/forge) — browser-automation agent team for Claude Code. Lives in its own repo as of 2026-06; install with `claude plugin marketplace add vivecuervo7/forge && claude plugin install forge@vive-forge`.
 
 ## License
 
