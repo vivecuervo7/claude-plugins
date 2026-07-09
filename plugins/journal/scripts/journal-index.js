@@ -3,10 +3,11 @@
  * Manages the monthly index.json and tag registry for journal entries.
  *
  * Usage:
- *   journal-index.js upsert <index-path>          (entry JSON read from stdin)
+ *   journal-index.js upsert <index-path>              (entry JSON read from stdin)
  *   journal-index.js increment-media <index-path> <file-field>
- *   journal-index.js tags <journal-root>          (output tag registry as JSON)
- *   journal-index.js sync-tags <journal-root>     (rebuild tag registry from all indexes; recovery tool)
+ *   journal-index.js tags <journal-root>              (output tag registry as JSON)
+ *   journal-index.js sync-tags <journal-root>         (rebuild tag registry from all indexes; recovery tool)
+ *   journal-index.js sync-index <journal-root> [YYYY/MM]  (rebuild monthly index.json from entry files; recovery tool)
  *
  * upsert: Add or replace an entry matched by its "file" field. Reading from
  *   stdin avoids shell-quoting issues with summaries containing single quotes,
@@ -15,6 +16,9 @@
  * tags: Output the tag registry (frequency map) for the journal root.
  * sync-tags: Rebuild the tag registry by scanning every monthly index. Useful
  *   if the registry has drifted (e.g. after manual entry deletion).
+ * sync-index: Rebuild monthly index.json files by scanning entry markdown on
+ *   disk (all months, or just YYYY/MM). Entries on disk are authoritative —
+ *   recovers an index row clobbered by a concurrent session.
  */
 
 const fs = require("fs");
@@ -84,10 +88,167 @@ function readStdin() {
   return fs.readFileSync(0, "utf8");
 }
 
+function unquote(s) {
+  const t = s.trim();
+  if (
+    (t.startsWith('"') && t.endsWith('"')) ||
+    (t.startsWith("'") && t.endsWith("'"))
+  ) {
+    return t.slice(1, -1);
+  }
+  return t;
+}
+
+function parseInlineArray(s) {
+  const t = s.trim();
+  const inner = t.replace(/^\[/, "").replace(/\]$/, "");
+  if (!inner.trim()) return [];
+  return inner
+    .split(",")
+    .map((x) => unquote(x))
+    .filter((x) => x.length > 0);
+}
+
+// Parse a single entry markdown file into an index row. The frontmatter format
+// is the plugin's own (see references/append.md Step 1), so a hand-rolled parser
+// avoids a YAML dependency. Returns null if the file has no frontmatter block.
+function parseEntryFile(filePath) {
+  const raw = fs.readFileSync(filePath, "utf8");
+  const lines = raw.split(/\r?\n/);
+  if (lines[0].trim() !== "---") return null;
+  let end = -1;
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === "---") {
+      end = i;
+      break;
+    }
+  }
+  if (end === -1) return null;
+
+  const fm = lines.slice(1, end);
+  const body = lines.slice(end + 1);
+
+  let date = "";
+  let time = "";
+  let project = "";
+  let tags = [];
+  let hasMediaHints = false;
+  let mediaCount = 0;
+  let currentKey = null;
+
+  for (const line of fm) {
+    const topLevel = !/^\s/.test(line) && /^([\w-]+):\s?(.*)$/.exec(line);
+    if (topLevel) {
+      currentKey = topLevel[1];
+      const val = topLevel[2];
+      switch (currentKey) {
+        case "date":
+          date = unquote(val);
+          break;
+        case "time":
+          time = unquote(val);
+          break;
+        case "project":
+          project = unquote(val);
+          break;
+        case "tags":
+          tags = parseInlineArray(val);
+          break;
+        case "media_hints":
+          hasMediaHints = true;
+          break;
+      }
+    } else if (currentKey === "media" && /^\s+-\s+/.test(line)) {
+      mediaCount++;
+    }
+  }
+
+  // Summary = first non-empty body paragraph, flattened to one line.
+  let summary = "";
+  let started = false;
+  const para = [];
+  for (const line of body) {
+    if (line.trim() === "") {
+      if (started) break;
+      continue;
+    }
+    started = true;
+    para.push(line.trim());
+  }
+  summary = para.join(" ").replace(/\s+/g, " ").trim();
+  if (summary.length > 120) summary = summary.slice(0, 117).trimEnd() + "...";
+
+  return {
+    date,
+    time,
+    project,
+    tags,
+    summary,
+    has_media_hints: hasMediaHints,
+    media_count: mediaCount,
+  };
+}
+
+function rebuildMonthIndex(journalRoot, ym) {
+  const [year, month] = ym.split("/");
+  const monthDir = path.join(journalRoot, "entries", year, month);
+  if (!fs.existsSync(monthDir)) return null;
+  const entries = [];
+  const days = fs
+    .readdirSync(monthDir)
+    .filter(
+      (d) =>
+        /^\d{2}$/.test(d) && fs.statSync(path.join(monthDir, d)).isDirectory()
+    );
+  for (const dd of days) {
+    const dayDir = path.join(monthDir, dd);
+    const files = fs
+      .readdirSync(dayDir)
+      .filter(
+        (f) =>
+          f.endsWith(".md") && fs.statSync(path.join(dayDir, f)).isFile()
+      );
+    for (const f of files) {
+      const parsed = parseEntryFile(path.join(dayDir, f));
+      if (!parsed) continue;
+      parsed.file = `${dd}/${f}`;
+      entries.push(parsed);
+    }
+  }
+  entries.sort((a, b) =>
+    `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)
+  );
+  writeIndex(path.join(monthDir, "index.json"), { version: 1, entries });
+  return entries.length;
+}
+
+function discoverMonths(journalRoot) {
+  const entriesDir = path.join(journalRoot, "entries");
+  const months = [];
+  if (!fs.existsSync(entriesDir)) return months;
+  const years = fs
+    .readdirSync(entriesDir)
+    .filter(
+      (d) =>
+        /^\d{4}$/.test(d) && fs.statSync(path.join(entriesDir, d)).isDirectory()
+    );
+  for (const year of years) {
+    const yearDir = path.join(entriesDir, year);
+    const mDirs = fs
+      .readdirSync(yearDir)
+      .filter(
+        (d) =>
+          /^\d{2}$/.test(d) && fs.statSync(path.join(yearDir, d)).isDirectory()
+      );
+    for (const m of mDirs) months.push(`${year}/${m}`);
+  }
+  return months.sort();
+}
+
 const [, , command, ...rest] = process.argv;
 
 if (!command) {
-  console.error("Usage: journal-index.js {upsert|increment-media|tags|sync-tags} ...");
+  console.error("Usage: journal-index.js {upsert|increment-media|tags|sync-tags|sync-index} ...");
   process.exit(1);
 }
 
@@ -181,6 +342,33 @@ if (command === "upsert") {
   }
   writeTags(path.join(journalRoot, "tags.json"), tags);
   console.log(`OK: ${Object.keys(tags).length} tags synced`);
+} else if (command === "sync-index") {
+  const [journalRoot, ym] = rest;
+  if (!journalRoot) {
+    console.error("Usage: journal-index.js sync-index <journal-root> [YYYY/MM]");
+    process.exit(1);
+  }
+  let months;
+  if (ym) {
+    if (!/^\d{4}\/\d{2}$/.test(ym)) {
+      console.error(`ERROR: Month must be YYYY/MM, got: ${ym}`);
+      process.exit(1);
+    }
+    months = [ym];
+  } else {
+    months = discoverMonths(journalRoot);
+  }
+  if (months.length === 0) {
+    console.error(`WARN: No months found under ${path.join(journalRoot, "entries")}`);
+  }
+  for (const month of months) {
+    const count = rebuildMonthIndex(journalRoot, month);
+    if (count === null) {
+      console.error(`WARN: No entries directory for ${month}`);
+      continue;
+    }
+    console.log(`OK: ${count} entries indexed for ${month}`);
+  }
 } else {
   console.error(`ERROR: Unknown command: ${command}`);
   process.exit(1);

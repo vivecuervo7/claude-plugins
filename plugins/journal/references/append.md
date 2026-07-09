@@ -9,7 +9,7 @@ Create a new journal entry for the work described in your prompt.
 Before writing anything, glob today's existing entries for this project:
 
 ```
-$JOURNAL_ROOT/entries/YYYY/MM/DD/*-<PROJECT>.md
+$JOURNAL_ROOT/entries/YYYY/MM/DD/??-??-<PROJECT>.md
 ```
 
 If any matches exist, read them and compare with your prompt:

@@ -15,7 +15,7 @@ claude plugin install journal@vive-claude
 
 Run `/journal setup` once. Setup asks where to store entries (default: `~/.claude-journal`) and installs auto-journal instructions into your CLAUDE.md. You can decline the install for manual-only behaviour, but hands-off is the point.
 
-By default, auto-journaling runs in the foreground — the parent session pauses for a few seconds while Haiku writes the entry. To run it non-blocking, edit `~/.claude/.vive-claude/journal/CLAUDE.md` and add `run_in_background=true` to the `Agent(...)` call. Caveat: background agents can't prompt for tool permissions, so the underlying Bash scripts (`journal-context.sh`, `journal-index.js`, etc.) must be pre-approved in your `settings.json` first.
+By default, auto-journaling runs in the foreground — the parent session pauses for a few seconds while Haiku writes the entry. During setup you can opt into **background mode**: setup installs a small set of scoped permission rules (the journal scripts plus read/write access to your journal root) and switches the installed instructions to a background-aware variant. From then on each auto-journal invocation checks readiness first and runs the append agent in the background when everything's in place — otherwise it falls back to writing the entry in the foreground, so **a journal entry is always written**, never lost to a failed background attempt. `/journal doctor` reports whether background mode is ready and, when it isn't, names exactly which permission rule is missing.
 
 ## How it works
 
@@ -38,9 +38,9 @@ Journaled: Added rate limiting to API endpoints → entries/2026/03/05/14-32-my-
 |---------|------|
 | `journal-append` agent | Writes entries. Spawned automatically after task completion, or manually via `/journal`. |
 | `journal-attach` agent | Attaches a media file to today's entry, via `/journal attach <file>`. |
-| `/journal` command | Single user-facing dispatcher — falls through to `attach`, `setup`, or `append`. |
+| `/journal` command | Single user-facing dispatcher — falls through to `attach`, `setup`, `doctor`, or `append`. |
 
-One entry per project per day — updates refine the existing entry rather than creating duplicates. The append agent prefers existing tags from the registry when semantically similar, keeping the namespace from drifting.
+Repeated invocations dedup against today's entries: a prompt already fully covered by an existing entry is skipped, while partially-new work gets a fresh *delta* entry covering only what hasn't been captured yet. The append agent prefers existing tags from the registry when semantically similar, keeping the namespace from drifting.
 
 ## Commands
 
@@ -53,7 +53,7 @@ One entry per project per day — updates refine the existing entry rather than 
 
 ## Storage
 
-Entries live at `~/.claude-journal/` by default. Override during setup or with `CLAUDE_JOURNAL_ROOT`.
+Entries live at `~/.claude-journal/` by default. The pointer file written by `/journal setup` (`~/.claude/journal-config.json`) is canonical; the `CLAUDE_JOURNAL_ROOT` environment variable is honoured only as a fallback when no pointer file exists.
 
 ```
 ~/.claude-journal/
@@ -69,6 +69,15 @@ Entries live at `~/.claude-journal/` by default. Override during setup or with `
 ```
 
 Each entry is a standalone markdown file with YAML frontmatter — portable and suitable for blog post generation. `entries/YYYY/MM/index.json` holds a per-entry summary (date, project, tags, summary, file path, media count) for every entry in that month. `tags.json` is a frequency map of every tag in use. Both are maintained on every append so external consumers (a future Claude session drafting a blog post, say) can scan one JSON file instead of opening every entry.
+
+The entry markdown files are the source of truth. `index.json` and `tags.json` are rebuildable caches:
+
+```bash
+node scripts/journal-index.js sync-index <journal-root> [YYYY/MM]   # rebuild monthly indexes from entry files
+node scripts/journal-index.js sync-tags  <journal-root>             # rebuild the tag registry from the indexes
+```
+
+**Known limitation:** the index and tag files are updated with an unlocked read-modify-write, so two sessions journaling at the same instant can clobber each other's update to `index.json`/`tags.json`. The entry markdown is never lost; run `sync-index` (then `sync-tags`) to rebuild the caches from disk.
 
 ## Tags
 

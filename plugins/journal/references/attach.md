@@ -9,7 +9,7 @@ Prompt format: `<file>` or `<file> <project>`. The file path may be absolute, re
 ## Steps
 
 1. **Find the target entry** using today's `DATE`:
-   - With a project arg: glob `$JOURNAL_ROOT/entries/YYYY/MM/DD/*-<project>.md`
+   - With a project arg: glob `$JOURNAL_ROOT/entries/YYYY/MM/DD/??-??-<project>.md`
    - Without: glob `$JOURNAL_ROOT/entries/YYYY/MM/DD/*.md` and pick the most recently modified
    - If no entry exists for today, emit the no-entry message and stop.
 

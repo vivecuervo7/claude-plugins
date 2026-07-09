@@ -4,7 +4,7 @@ description: "Journal recent work, attach media, run setup, or check install hea
 user-invocable: true
 model: haiku
 argument-hint: "[attach <file> | setup | doctor | <focus text>]"
-allowed-tools: Read, Write, Edit, Bash(bash **/journal/*/scripts/*)
+allowed-tools: Read, Write, Edit, Bash(bash **/journal/*/scripts/*), Bash(bash **/journal/scripts/*)
 ---
 
 # Journal
